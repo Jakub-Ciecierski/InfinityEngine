@@ -1,0 +1,63 @@
+CC = g++
+
+CFLAGS  = -g -Wall -std=c++11
+LDFLAGS  := $(LDFLAGS) -lm -lGL -L/usr/X11R6/lib -lGLU -lglut -lGLEW -lXi -lXmu
+	
+BUILDDIR := .
+BINDIR := .
+APPNAME := galaxy
+
+default: main
+
+main: src/Main.cpp $(BUILDDIR)/GalaxyLoader.o $(BUILDDIR)/Renderer.o $(BUILDDIR)/Camera.o $(BUILDDIR)/Star.o $(BUILDDIR)/ShaderLoader.o $(BUILDDIR)/Cube.o $(BUILDDIR)/Sphere.o $(BUILDDIR)/Triangle.o $(BUILDDIR)/Point.o include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -o main $(BUILDDIR)/GalaxyLoader.o $(BUILDDIR)/Renderer.o $(BUILDDIR)/Camera.o $(BUILDDIR)/Star.o $(BUILDDIR)/ShaderLoader.o $(BUILDDIR)/Cube.o $(BUILDDIR)/Sphere.o $(BUILDDIR)/Triangle.o $(BUILDDIR)/Point.o
+	
+#################
+#    UTILITY    #
+#################
+
+$(BUILDDIR)/GalaxyLoader.o: src/util/GalaxyLoader.cpp src/util/GalaxyLoader.h include/glm/glm/glm.hpp $(BUILDDIR)/Star.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/util/GalaxyLoader.cpp $(BUILDDIR)/Star.o
+
+#################
+#      GFX      #
+#################
+
+$(BUILDDIR)/Camera.o: src/gfx/Camera.cpp src/gfx/Camera.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/Camera.cpp
+
+$(BUILDDIR)/Renderer.o: src/gfx/Renderer.cpp src/gfx/Renderer.h $(BUILDDIR)/Star.o $(BUILDDIR)/Sphere.o $(BUILDDIR)/Camera.o include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/Renderer.cpp $(BUILDDIR)/Star.o $(BUILDDIR)/Sphere.o $(BUILDDIR)/Camera.o
+
+$(BUILDDIR)/Star.o: src/gfx/Star.cpp src/gfx/Star.h include/glm/glm/glm.hpp $(BUILDDIR)/Sphere.o $(BUILDDIR)/Point.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/Star.cpp $(BUILDDIR)/Sphere.o $(BUILDDIR)/Point.o
+
+#################
+#    GFX/UTIL   #
+#################
+
+$(BUILDDIR)/ShaderLoader.o: src/gfx/util/ShaderLoader.cpp src/gfx/util/ShaderLoader.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/util/ShaderLoader.cpp
+
+#################
+#   GFX/SHAPES  #
+#################
+
+$(BUILDDIR)/Cube.o: src/gfx/shapes/Cube.cpp src/gfx/shapes/Cube.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/shapes/Cube.cpp
+
+$(BUILDDIR)/Point.o: src/gfx/shapes/Point.cpp src/gfx/shapes/Point.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/shapes/Point.cpp
+
+$(BUILDDIR)/Sphere.o: src/gfx/shapes/Sphere.cpp src/gfx/shapes/Sphere.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/shapes/Sphere.cpp
+
+$(BUILDDIR)/Triangle.o: src/gfx/shapes/Triangle.cpp src/gfx/shapes/Triangle.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -c src/gfx/shapes/Triangle.cpp
+
+#################
+#     CUSTOM	#
+#################
+
+clean: 
+	$(RM) $(BINDIR)/main $(BUILDDIR)/*.o *~
