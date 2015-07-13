@@ -109,6 +109,47 @@ Sphere::Sphere(float x, float y, float z)
     Model = glm::mat4(1.0f);
     Model = glm::translate(Model, glm::vec3(X, Y, Z));
 
+    /*
+    static const GLfloat g_vertex_buffer_data[] = {
+        -1.0f, -1.0f, -1.0f, // triangle 1 : begin
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, // triangle 1 : end
+        1.0f, 1.0f, -1.0f, // triangle 2 : begin
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f, // triangle 2 : end
+        1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f
+    };
+    */
+        
     static const GLfloat g_vertex_buffer_data[] = {
         0.02f, 0.02f, 0.02f, // triangle 1 : begin
         0.02f, 0.02f, -0.06f,

@@ -56,6 +56,8 @@ void RenderString(float x, float y, void *font, const unsigned char* string)
 
 void render(void)
 {
+    glUseProgram(programID);
+
     camera->Update();
     calculateFPS();
 
@@ -64,12 +66,12 @@ void render(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    //galaxyCollisionInit(galaxies, GALAXY_COUNT, MAX_DISK_COUNT + MAX_BULGE_COUNT);
-    
-    glUseProgram(programID);
+ 
+    MVP = camera->ProjectionMatrix * camera->ViewMatrix;
     sphere->Render(&MVP);
-    /*
+
+    //galaxyCollisionInit(galaxies, GALAXY_COUNT, MAX_DISK_COUNT + MAX_BULGE_COUNT);    
+
     for (int i = 0; i < GALAXY_COUNT; i++)
     {
         for (int j = 0; j < (MAX_DISK_COUNT + MAX_BULGE_COUNT); j++)
@@ -81,7 +83,7 @@ void render(void)
             
             star->Render(&MVP);
         }
-    }*/
+    }
 
     glutSwapBuffers();
 
@@ -200,7 +202,7 @@ int GFXInit(int argc, char** argv)
     // Objects
     //sphere = new Sphere(0, 0, 0, 0.002f);
     sphere = new Sphere(0, 0, 0);
-    sphere1 = new Sphere(0.5f, 0.5f, 0.5f, 0.002f);
+    //sphere = new Sphere(0.5f, 0.5f, 0.5f, 0.002f);
     cube = new Cube();
     camera = new Camera();
 
@@ -212,9 +214,8 @@ int GFXInit(int argc, char** argv)
     glutMotionFunc(mouseMove);
 
     // Load shaders
-    programID = LoadShaders("shaders/VertexShader.vert", "shaders/FragmentShader.frag");
-    //programID = LoadShaders("VertexShader.txt", "FragmentShader.txt");
-    //programID = LoadShaders("util/VertexShader.txt", "util/FragmentShader.txt");
+    programID = LoadShaders("src/gfx/shaders/VertexShader.vert", "src/gfx/shaders/FragmentShader.frag");
+    fprintf(stderr, "Current WD: %s\n", get_current_dir_name());
 
     // Get a handle for our "MVP" uniform.
     MatrixID = glGetUniformLocation(programID, "MVP");
