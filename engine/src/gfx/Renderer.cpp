@@ -1,5 +1,8 @@
 #include "Renderer.h"
 
+const int windowWidth = 1024;
+const int windowHeight = 768;
+
 /*********************/
 /***** VARIABLES *****/
 /*********************/
@@ -9,8 +12,11 @@ glm::mat4 View;
 glm::mat4 Model;
 glm::mat4 MVP;
 
-const int windowWidth = 1024;
-const int windowHeight = 768;
+GLuint programID;
+GLuint MatrixID;
+
+GLuint Texture;
+GLuint TextureID;
 
 Triangle* triangle;
 Cube* cube;
@@ -19,9 +25,6 @@ Sphere* sphere1;
 Camera* camera;
 
 Star*** galaxies;
-
-GLuint programID;
-GLuint MatrixID;
 
 //  The number of frames
 int frameCount = 0;
@@ -47,7 +50,7 @@ void RenderString(float x, float y, void *font, const unsigned char* string);
 
 void RenderString(float x, float y, void *font, const unsigned char* string)
 {
-    char *c;
+    //char *c;
 
     glRasterPos2f(x, y);
 
@@ -67,9 +70,10 @@ void render(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
  
-    MVP = camera->ProjectionMatrix * camera->ViewMatrix;
-    sphere->Render(&MVP);
-
+    //MVP = camera->ProjectionMatrix * camera->ViewMatrix * sphere->GetModelMatrix();
+    //glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    //sphere->Render();
+     
     //galaxyCollisionInit(galaxies, GALAXY_COUNT, MAX_DISK_COUNT + MAX_BULGE_COUNT);    
 
     for (int i = 0; i < GALAXY_COUNT; i++)
@@ -78,10 +82,9 @@ void render(void)
         {
             Star* star = galaxies[i][j];
             
+            MVP = camera->ProjectionMatrix * camera->ViewMatrix * star->GetSphere()->GetModelMatrix();
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-            MVP = camera->ProjectionMatrix * camera->ViewMatrix;
-            
-            star->Render(&MVP);
+            star->GetSphere()->RenderTexture();
         }
     }
 
@@ -171,41 +174,53 @@ void calculateFPS()
 
 int GFXInit(int argc, char** argv)
 {
-    glutInit(&argc, argv);
+	glutInit(&argc, argv);
 
-    // GLUT Display
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(windowWidth, windowHeight);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Galaxy Collision");
+    initWindow();
 
-    // GLEW init
-    glewExperimental = true; // Needed in core profile 
-    if (glewInit() != GLEW_OK) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        return -1;
-    }
+    initEvents();
 
-    // Enable depth test
-    glEnable(GL_DEPTH_TEST);
-    // Accept fragment if it closer to the camera than the former one
-    glDepthFunc(GL_LESS);
+    initProgram();
 
-    // VAO
-    GLuint VertexArrayID;
-    glGenVertexArrays(1, &VertexArrayID);
-    glBindVertexArray(VertexArrayID);
+    initSampleObjects();
+
+    galaxies = gllParse(argv[1], Texture, TextureID);
+
+    glutMainLoop();
+
+    delete(galaxies);
+    
+    return EXIT_SUCCESS;
+}
+
+int initWindow()
+{
+	// GLUT Display
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(windowWidth, windowHeight);
+	glutInitWindowPosition(100, 100);
+	glutCreateWindow("Galaxy Collision");
+
+	// GLEW init
+	glewExperimental = true; // Needed in core profile
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
 
     // Black screen
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    // Objects
-    //sphere = new Sphere(0, 0, 0, 0.002f);
-    sphere = new Sphere(0, 0, 0);
-    //sphere = new Sphere(0.5f, 0.5f, 0.5f, 0.002f);
-    cube = new Cube();
-    camera = new Camera();
+	return 0;
+}
 
+int initEvents()
+{
     // Glut function poitners
     glutDisplayFunc(render);
     glutKeyboardFunc(keyboard);
@@ -213,18 +228,45 @@ int GFXInit(int argc, char** argv)
     glutMouseFunc(mouse);
     glutMotionFunc(mouseMove);
 
-    // Load shaders
-    programID = LoadShaders("src/gfx/shaders/VertexShader.vert", "src/gfx/shaders/FragmentShader.frag");
+    return 0;
+}
+
+int initProgram()
+{
+    // VAO
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
     fprintf(stderr, "Current WD: %s\n", get_current_dir_name());
+
+    // Load shaders
+    //programID = LoadShaders("src/gfx/shaders/VertexShader.vert", "src/gfx/shaders/FragmentShader.frag");
+    programID = LoadShaders("src/gfx/shaders/TextureVertexShader.vert", "src/gfx/shaders/TextureFragmentShader.frag");
 
     // Get a handle for our "MVP" uniform.
     MatrixID = glGetUniformLocation(programID, "MVP");
 
-    galaxies = gllParse(argv[1]);
+    // Load the texture using any two methods
+	Texture = LoadBMP("resources/uvtemplate.bmp");
+	//GLuint Texture = loadDDS("uvtemplate.DDS");
 
-    glutMainLoop();
+	// Get a handle for our "myTextureSampler" uniform
+	TextureID  = glGetUniformLocation(programID, "textureSampler");
 
-    delete(galaxies);
-    
-    return EXIT_SUCCESS;
+	fprintf(stderr, "ProgramID: %d, Texture: %d, TextureID: %d\n", programID, Texture, TextureID);
+
+	return 0;
+}
+
+int initSampleObjects()
+{
+    // Objects
+    //sphere = new Sphere(0, 0, 0, 0.002f);
+    sphere = new Sphere(0, 0, 0);
+    //sphere = new Sphere(0.5f, 0.5f, 0.5f, 0.002f);
+    cube = new Cube();
+    camera = new Camera(0.0f, 0.0f, 50.0f);
+
+    return 0;
 }

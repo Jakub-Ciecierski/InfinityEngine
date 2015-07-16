@@ -2,7 +2,25 @@
 
 Camera::Camera()
 {
-    position = glm::vec3(0.0f, 0.0f, 50.0f);
+    this->x = 0;
+    this->y = 0;
+    this->z = 0;
+
+    init();
+}
+
+Camera::Camera(float x, float y, float z)
+{
+    this->x = x;
+    this->y = y;
+    this->z = z;
+
+    init();
+}
+
+void Camera::init()
+{
+    position = glm::vec3(x, y, z);
 
     // horizontal angle : toward -Z
     horizontalAngle = 3.14f;
@@ -46,7 +64,7 @@ void Camera::Update()
     float FoV = initialFoV;
 
     // Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
+    ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 10000.0f);
     // Camera matrix
     ViewMatrix = glm::lookAt(
         // Camera is here

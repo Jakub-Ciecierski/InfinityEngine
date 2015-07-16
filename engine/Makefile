@@ -9,8 +9,8 @@ APPNAME := galaxy
 
 default: engine
 
-engine: src/Main.cpp GalaxyLoader.o Renderer.o Camera.o Star.o ShaderLoader.o Cube.o Sphere.o Triangle.o Point.o include/glm/glm/glm.hpp
-	$(CC) $(CFLAGS) -o engine src/Main.cpp GalaxyLoader.o Renderer.o Camera.o Star.o ShaderLoader.o Cube.o Sphere.o Triangle.o Point.o $(LDFLAGS)
+engine: src/Main.cpp GalaxyLoader.o Renderer.o Camera.o Star.o ShaderLoader.o Cube.o Sphere.o Triangle.o Point.o BMPLoader.o include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) -o engine src/Main.cpp GalaxyLoader.o Renderer.o Camera.o Star.o ShaderLoader.o Cube.o Sphere.o Triangle.o Point.o BMPLoader.o $(LDFLAGS)
 	
 #################
 #    UTILITY    #
@@ -26,8 +26,8 @@ GalaxyLoader.o: src/util/GalaxyLoader.cpp src/util/GalaxyLoader.h include/glm/gl
 Camera.o: src/gfx/Camera.cpp src/gfx/Camera.h include/glm/glm/glm.hpp
 	$(CC) $(CFLAGS) -c src/gfx/Camera.cpp $(LDFLAGS)
 
-Renderer.o: src/gfx/Renderer.cpp src/gfx/Renderer.h Star.o Sphere.o Camera.o include/glm/glm/glm.hpp
-	$(CC) $(CFLAGS) -c src/gfx/Renderer.cpp Star.o Sphere.o Camera.o $(LDFLAGS)
+Renderer.o: src/gfx/Renderer.cpp src/gfx/Renderer.h Star.o Sphere.o Camera.o BMPLoader.o include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) -c src/gfx/Renderer.cpp Star.o Sphere.o Camera.o BMPLoader.o $(LDFLAGS)
 
 Star.o: src/gfx/Star.cpp src/gfx/Star.h include/glm/glm/glm.hpp Sphere.o Point.o
 	$(CC) $(CFLAGS) -c src/gfx/Star.cpp Sphere.o Point.o $(LDFLAGS)
@@ -38,6 +38,9 @@ Star.o: src/gfx/Star.cpp src/gfx/Star.h include/glm/glm/glm.hpp Sphere.o Point.o
 
 ShaderLoader.o: src/gfx/util/ShaderLoader.cpp src/gfx/util/ShaderLoader.h include/glm/glm/glm.hpp
 	$(CC) $(CFLAGS) -c src/gfx/util/ShaderLoader.cpp $(LDFLAGS)
+
+BMPLoader.o: src/gfx/util/BMPLoader.cpp src/gfx/util/BMPLoader.h include/glm/glm/glm.hpp
+	$(CC) $(CFLAGS) -c src/gfx/util/BMPLoader.cpp $(LDFLAGS)
 
 #################
 #   GFX/SHAPES  #

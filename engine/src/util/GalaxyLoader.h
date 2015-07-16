@@ -26,3 +26,5 @@
 using namespace std;
 
 Star*** gllParse(const char* filename);
+
+Star*** gllParse(const char* filename, GLuint Texture, GLuint TextureID);

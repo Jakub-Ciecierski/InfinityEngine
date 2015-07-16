@@ -11,9 +11,6 @@
 
 #include "../../include/glm/glm/glm.hpp"
 #include "../../include/glm/glm/gtc/matrix_transform.hpp"
-//#include <glm/glm.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
-
 
 #include "shapes/Sphere.h"
 #include "shapes/Cube.h"
@@ -22,8 +19,16 @@
 #include "Camera.h"
 #include "Star.h"
 #include "../util/GalaxyLoader.h"
+#include "util/BMPLoader.h"
+
 //#include "../cuda/GalaxyCollision.cuh"
 
 int GFXInit(int argc, char** argv);
 
+int initWindow();
 
+int initEvents();
+
+int initProgram();
+
+int initSampleObjects();

@@ -35,11 +35,14 @@ public:
     Star(float mass, float x, float y, float z,
         float vx, float vy, float vz);
 
+    Star(float mass, float x, float y, float z,
+            float vx, float vy, float vz, GLuint Texture, GLuint TextureID);
+
     void setGalaxyType(int galaxyType);
     void setStarType(int starType);
 
     void Update(float ax, float ay, float az);
 
-    void Render(glm::mat4* MVP);
+    Sphere* GetSphere();
 };
 

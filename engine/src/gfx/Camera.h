@@ -11,15 +11,18 @@
 class Camera
 {
 private:
-
+    void init();
 
 public:
     /*********************/
     /***** VARIABLES *****/
     /*********************/
-
+    float x;
+    float y;
+    float z;
+    
     // position
-    glm::vec3 position = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::vec3 position;
 
     // horizontal angle : toward -Z
     float horizontalAngle = 3.14f;
@@ -55,6 +58,8 @@ public:
     /*********************/
 
     Camera();
+    
+    Camera(float x, float y, float z);
 
 };
 

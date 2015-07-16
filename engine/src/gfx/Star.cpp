@@ -36,6 +36,22 @@ Star::Star(float mass, float x, float y, float z,
     sphere = new Sphere(this->x, this->y, this->z);
 }
 
+Star::Star(float mass, float x, float y, float z,
+    float vx, float vy, float vz, GLuint Texture, GLuint TextureID)
+{
+    this->mass = mass;
+
+    this->x = x;
+    this->y = y;
+    this->z = z;
+
+    this->vx = vx;
+    this->vy = vy;
+    this->vz = vz;
+
+    sphere = new Sphere(this->x, this->y, this->z, Texture, TextureID);
+}
+
 void Star::setGalaxyType(int galaxyType)
 {
     this->galaxyType = galaxyType;
@@ -59,7 +75,7 @@ void Star::Update(float ax, float ay, float az)
     this->sphere->Z += vz * speed;
 }
 
-void Star::Render(glm::mat4* MVP)
+Sphere* Star::GetSphere()
 {
-    this->sphere->Render(MVP);
-}
+    return this->sphere;
+}     
