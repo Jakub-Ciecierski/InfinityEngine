@@ -24,13 +24,13 @@ Triangle::Triangle()
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
     /***** Color Buffer *******/
-    /*
+    
     // Generate 1 buffer, put the resulting identifier in colorbuffer
     glGenBuffers(1, &colorbuffer);
     // The following commands will talk about our 'colorbuffer' buffer
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
     // Give our vertices to OpenGL.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);*/
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 }
 
 void Triangle::Render()

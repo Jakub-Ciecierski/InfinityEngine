@@ -10,16 +10,7 @@
 class Sphere
 {
 private:
-    // This will identify our vertex buffer
-    GLuint vertexbuffer;
-    GLuint colorbuffer;
-    GLuint uvbuffer;
-    GLuint elementbuffer;
 
-    GLuint Texture;
-    GLuint TextureID;
-
-    int VBOSize = 12 * 3;
 
     glm::mat4 Model;
     int counter = 0;
@@ -29,8 +20,21 @@ private:
     void initVertices();
     void initColor();
     void initTexture();
+    void initIndices();
 
 public:
+    
+    // This will identify our vertex buffer
+    GLuint vertexbuffer;
+    GLuint colorbuffer;
+    GLuint uvbuffer;
+    GLuint elementbuffer;
+
+    GLuint Texture;
+    GLuint TextureID;
+
+    int indicesSize = 12 * 3;
+    
     float X;
     float Y;
     float Z;
@@ -42,10 +46,10 @@ public:
     Sphere();
     Sphere(float x, float y, float z);
     Sphere(float x, float y, float z, GLuint texture, GLuint textureID);
-    Sphere(float x, float y, float z, float width);
 
     void Render();
     void RenderTexture();
+    void RenderTextureIndices();
     
     glm::mat4 GetModelMatrix();
 };

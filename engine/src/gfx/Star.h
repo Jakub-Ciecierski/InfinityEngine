@@ -10,6 +10,7 @@
 
 #define GLX_DISK 0
 #define GLX_BULGE 1
+#define GLX_HALO 2
 
 class Star
 {
@@ -24,6 +25,7 @@ private:
     int oldTimeSinceStart = 0;
 
     Sphere* sphere;
+    Point* point;
 public:
 
     float mass;
@@ -44,5 +46,7 @@ public:
     void Update(float ax, float ay, float az);
 
     Sphere* GetSphere();
+    
+    Point* GetPoint();
 };
 

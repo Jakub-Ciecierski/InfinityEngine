@@ -1,5 +1,7 @@
 #include "Sphere.h"
 
+static std::vector<unsigned short> indices;
+
 Sphere::Sphere()
 {
     X = Y = Z = 0;
@@ -21,80 +23,14 @@ Sphere::Sphere(float x, float y, float z)
 Sphere::Sphere(float x, float y, float z, GLuint texture, GLuint textureID)
 {
     X = x; Y = y; Z = z;
-    ScaleX = ScaleY = ScaleZ = 0.2f;
+    ScaleX = ScaleY = ScaleZ = 0.002f;
 
     this->Texture = texture;
     this->TextureID = textureID;
 
     initVertices();
     initTexture();
-}
-
-Sphere::Sphere(float x, float y, float z, float width)
-{
-    X = x; Y = y; Z = z;
-
-    Model = glm::mat4(1.0f);
-    Model = glm::translate(Model, glm::vec3(X, Y, Z));
-
-    static const GLfloat g_vertex_buffer_data[] = {
-        0.0f, 0.0f, 0.0f,
-        width, 0.0f, 0.0f,
-        width, width, 0.0f,
-        0.0f, width, 0.0f,
-        0.0f, 0.0f, width,
-        width, 0.0f, width,
-        width, width, width,
-        0.0f, width, width
-    };
-
-    // One color for each vertex. They were generated randomly.
-    static const GLfloat g_color_buffer_data[] = {
-        0.583f, 0.771f, 0.014f,
-        0.609f, 0.115f, 0.436f,
-        0.327f, 0.483f, 0.844f,
-        0.822f, 0.569f, 0.201f,
-        0.435f, 0.602f, 0.223f,
-        0.310f, 0.747f, 0.185f,
-        0.597f, 0.770f, 0.761f,
-        0.559f, 0.436f, 0.730f
-    };
-
-    static const std::vector<unsigned short> indices;/* = {
-        0, 1, 2,
-        0, 2, 3,
-        1, 5, 2,
-        5, 6, 2,
-        6, 5, 4,
-        6, 4, 7,
-        4, 0, 3,
-        4, 3, 7,
-        7, 3, 2,
-        2, 6, 7,
-        1, 0, 4,
-        1, 4, 5 };*/
-
-    /***** Vertex Buffer *******/
-    // Generate 1 buffer, put the resulting identifier in vertexbuffer
-    glGenBuffers(1, &vertexbuffer);
-    // The following commands will talk about our 'vertexbuffer' buffer
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    // Give our vertices to OpenGL.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-    /***** Color Buffer *******/
-    // Generate 1 buffer, put the resulting identifier in colorbuffer
-    glGenBuffers(1, &colorbuffer);
-    // The following commands will talk about our 'colorbuffer' buffer
-    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    // Give our vertices to OpenGL.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-    /***** VBO *******/
-    // Generate a buffer for the indices
-    glGenBuffers(1, &elementbuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    initIndices();
 }
 
 void Sphere::init()
@@ -110,36 +46,47 @@ void Sphere::initVertices()
 	        -1.0f, -1.0f, -1.0f, // triangle 1 : begin
 	        -1.0f, -1.0f, 1.0f,
 	        -1.0f, 1.0f, 1.0f, // triangle 1 : end
+                
 	        1.0f, 1.0f, -1.0f, // triangle 2 : begin
 	        -1.0f, -1.0f, -1.0f,
 	        -1.0f, 1.0f, -1.0f, // triangle 2 : end
+                
 	        1.0f, -1.0f, 1.0f,
 	        -1.0f, -1.0f, -1.0f,
 	        1.0f, -1.0f, -1.0f,
+                
 	        1.0f, 1.0f, -1.0f,
 	        1.0f, -1.0f, -1.0f,
 	        -1.0f, -1.0f, -1.0f,
+                
 	        -1.0f, -1.0f, -1.0f,
 	        -1.0f, 1.0f, 1.0f,
 	        -1.0f, 1.0f, -1.0f,
+                
 	        1.0f, -1.0f, 1.0f,
 	        -1.0f, -1.0f, 1.0f,
 	        -1.0f, -1.0f, -1.0f,
+                
 	        -1.0f, 1.0f, 1.0f,
 	        -1.0f, -1.0f, 1.0f,
 	        1.0f, -1.0f, 1.0f,
+                
 	        1.0f, 1.0f, 1.0f,
 	        1.0f, -1.0f, -1.0f,
 	        1.0f, 1.0f, -1.0f,
+                
 	        1.0f, -1.0f, -1.0f,
 	        1.0f, 1.0f, 1.0f,
 	        1.0f, -1.0f, 1.0f,
+                
 	        1.0f, 1.0f, 1.0f,
 	        1.0f, 1.0f, -1.0f,
 	        -1.0f, 1.0f, -1.0f,
+                
 	        1.0f, 1.0f, 1.0f,
 	        -1.0f, 1.0f, -1.0f,
 	        -1.0f, 1.0f, 1.0f,
+                
 	        1.0f, 1.0f, 1.0f,
 	        -1.0f, 1.0f, 1.0f,
 	        1.0f, -1.0f, 1.0f
@@ -255,13 +202,37 @@ void Sphere::initTexture()
      glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
 }
 
+void Sphere::initIndices()
+{
+    if(indices.empty()){
+        fprintf(stderr, "initIndicies()\n");
+        indices.push_back(0);indices.push_back(1);indices.push_back(2);
+        indices.push_back(0);indices.push_back(2);indices.push_back(3);
+        indices.push_back(1);indices.push_back(5);indices.push_back(2);
+        indices.push_back(5);indices.push_back(6);indices.push_back(2);
+        indices.push_back(6);indices.push_back(5);indices.push_back(4);
+        indices.push_back(6);indices.push_back(4);indices.push_back(7);
+        indices.push_back(4);indices.push_back(0);indices.push_back(3);
+        indices.push_back(4);indices.push_back(3);indices.push_back(7);
+        indices.push_back(7);indices.push_back(3);indices.push_back(2);
+        indices.push_back(2);indices.push_back(6);indices.push_back(7);
+        indices.push_back(1);indices.push_back(0);indices.push_back(4);
+        indices.push_back(1);indices.push_back(4);indices.push_back(5);
+    }
+    /***** Indices *******/
+    // Generate a buffer for the indices
+    glGenBuffers(1, &elementbuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+}
+
 glm::mat4 Sphere::GetModelMatrix()
 {
     glm::mat4 ScalingMatrix = glm::scale(glm::mat4(), glm::vec3(this->ScaleX, this->ScaleY, this->ScaleZ));
     
-    glm::mat4 TranslateMAtrix = glm::translate(glm::mat4(), glm::vec3(this->X, this->Y, this->Z));
+    glm::mat4 TranslateMatrix = glm::translate(glm::mat4(), glm::vec3(this->X, this->Y, this->Z));
     
-    glm::mat4 Model = TranslateMAtrix * ScalingMatrix;
+    glm::mat4 Model = TranslateMatrix * ScalingMatrix;
 
     return Model;
 }
@@ -315,10 +286,10 @@ void Sphere::Render()
 void Sphere::RenderTexture()
 {
     // Bind our texture in Texture Unit 0
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture);
-	// Set our "textureSampler" sampler to user Texture Unit 0
-	glUniform1i(TextureID, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Texture);
+    // Set our "textureSampler" sampler to user Texture Unit 0
+    glUniform1i(TextureID, 0);
 
 	// 1rst attribute buffer : vertices
     glEnableVertexAttribArray(0);
@@ -332,20 +303,67 @@ void Sphere::RenderTexture()
         (void*)0            // array buffer offset
 	);
 
-	// 2nd attribute buffer : UVs
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glVertexAttribPointer(
-		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-		2,                                // size : U+V => 2
-		GL_FLOAT,                         // type
-		GL_FALSE,                         // normalized?
-		0,                                // stride
-		(void*)0                          // array buffer offset
-	);
-
+    // 2nd attribute buffer : UVs
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glVertexAttribPointer(
+        1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+        2,                                // size : U+V => 2
+        GL_FLOAT,                         // type
+        GL_FALSE,                         // normalized?
+        0,                                // stride
+        (void*)0                          // array buffer offset
+    );
+    //fprintf(stderr, "Render() before glDrawArrays\n");
     // Draw the cube !
     glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+    //fprintf(stderr, "Render() after glDrawArrays\n");
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+}
+
+void Sphere::RenderTextureIndices()
+{
+    // Bind our texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Texture);
+    // Set our "textureSampler" sampler to user Texture Unit 0
+    glUniform1i(TextureID, 0);
+
+	// 1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(
+        0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+        3,                  // size
+        GL_FLOAT,           // type
+        GL_FALSE,           // normalized?
+        0,                  // stride
+        (void*)0            // array buffer offset
+	);
+
+    // 2nd attribute buffer : UVs
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glVertexAttribPointer(
+        1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+        2,                                // size : U+V => 2
+        GL_FLOAT,                         // type
+        GL_FALSE,                         // normalized?
+        0,                                // stride
+        (void*)0                          // array buffer offset
+    );
+
+    // Index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+
+     // Draw the triangles !
+    glDrawElements(
+        GL_TRIANGLES,      // mode
+        indices.size(),    // count
+        GL_UNSIGNED_SHORT,   // type
+        (void*)0           // element array buffer offset
+    );
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);

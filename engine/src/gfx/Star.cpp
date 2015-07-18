@@ -12,7 +12,7 @@ Star::Star()
     this->vy = 0;
     this->vz = 0;
 
-    sphere = new Sphere(this->x, this->y, this->z, width);
+    //sphere = new Sphere(this->x, this->y, this->z, width);
 }
 
 Star::Star(float mass, float x, float y, float z,
@@ -49,7 +49,8 @@ Star::Star(float mass, float x, float y, float z,
     this->vy = vy;
     this->vz = vz;
 
-    sphere = new Sphere(this->x, this->y, this->z, Texture, TextureID);
+    //sphere = new Sphere(this->x, this->y, this->z, Texture, TextureID);
+    point = new Point(this->x, this->y, this->z, Texture, TextureID);
 }
 
 void Star::setGalaxyType(int galaxyType)
@@ -69,13 +70,22 @@ void Star::Update(float ax, float ay, float az)
     vx += ax * speed;
     vy += ay * speed;
     vz += az * speed;
-
+/*
     this->sphere->X += vx * speed;
     this->sphere->Y += vy * speed;
     this->sphere->Z += vz * speed;
+ */  
+    this->point->X += vx * speed;
+    this->point->Y += vy * speed;
+    this->point->Z += vz * speed;
 }
 
 Sphere* Star::GetSphere()
 {
     return this->sphere;
+}     
+
+Point* Star::GetPoint()
+{
+    return this->point;
 }     

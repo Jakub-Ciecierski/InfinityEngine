@@ -12,12 +12,16 @@
 #include "../../include/glm/glm/glm.hpp"
 #include "../../include/glm/glm/gtc/matrix_transform.hpp"
 
+#include "../../include/SDL2/include/SDL.h"
+#include "../../include/SDL2/include/SDL_opengl.h"
+
 #include "shapes/Sphere.h"
 #include "shapes/Cube.h"
 #include "shapes/Triangle.h"
 #include "util/ShaderLoader.h"
 #include "Camera.h"
 #include "Star.h"
+#include "Galaxy.h"
 #include "../util/GalaxyLoader.h"
 #include "util/BMPLoader.h"
 
