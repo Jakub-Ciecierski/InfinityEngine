@@ -2,9 +2,10 @@ OBJS = src/Main.cpp src/util/GalaxyLoader.cpp src/gfx/Renderer.cpp src/gfx/Camer
 
 CC = g++ 
 
-CFLAGS  = -g -Wall -std=c++11
-LDFLAGS  := $(LDFLAGS) -lGL -lglut -lGLEW
-
+#CFLAGS  = -g -Wall -std=c++11
+CFLAGS  = -g -Wall
+#LDFLAGS  := $(LDFLAGS) -lGL -lglut -lGLEW
+LDFLAGS  := $(LDFLAGS)
 INCLUDES = include
 
 APP_NAME = engine

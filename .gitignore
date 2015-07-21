@@ -1,7 +1,7 @@
 doc/
 engine/src/build/
 engine/src/bin/
-engine/nbproject/
+*/nbproject/
 *.o
 .settings/
 .project

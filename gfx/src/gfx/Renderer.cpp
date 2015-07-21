@@ -314,11 +314,13 @@ int GFXInit(int argc, char** argv)
     //galaxies = gllParse(argv[1], Texture, TextureID);
     _galaxies = glxParseGalaxies(argv[1]);
 
+    printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+    
     glutMainLoop();
 
     delete galaxies;
     delete _galaxies;
-    
+
     return EXIT_SUCCESS;
 }
 

@@ -1,14 +1,15 @@
 /**
  * 
  * This library is used to keep all functions used 
- * for io and signal handlering
+ * for input/output and signal handling.
  * 
  * */
 
 #ifndef _IO_H_
 #define _IO_H_
 
-#include "macros.h"
+#include "../util/macros.h"
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>

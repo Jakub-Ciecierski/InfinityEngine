@@ -1,7 +1,13 @@
+/**
+ * Contains all necessary functions for 
+ * low level socket programming.
+ */
+
 #ifndef _SOCKETS_H_
 #define _SOCKETS_H_
 
-#include "macros.h"
+#include "../util/macros.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

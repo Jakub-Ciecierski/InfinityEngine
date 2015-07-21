@@ -1,7 +1,8 @@
 /*
  * time.h
  *
- *	Contains a cross-platform solution for time measurement
+ *	Contains a cross-platform solution for time measurement.
+ *      Works on
  *	Windows, Linux, Apple-OS
  *
  *
