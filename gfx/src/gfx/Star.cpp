@@ -28,11 +28,6 @@ Star::Star(float mass, float x, float y, float z,
     this->vy = vy;
     this->vz = vz;
     
-    /*
-    this->vx = 0;
-    this->vy = 0;
-    this->vz = 0;
-    */
     sphere = new Sphere(this->x, this->y, this->z);
 }
 
@@ -48,6 +43,8 @@ Star::Star(float mass, float x, float y, float z,
     this->vx = vx;
     this->vy = vy;
     this->vz = vz;
+
+
 
     //sphere = new Sphere(this->x, this->y, this->z, Texture, TextureID);
     point = new Point(this->x, this->y, this->z, Texture, TextureID);
@@ -75,6 +72,8 @@ void Star::Update(float ax, float ay, float az)
     this->sphere->Y += vy * speed;
     this->sphere->Z += vz * speed;
  */  
+
+
     this->point->X += vx * speed;
     this->point->Y += vy * speed;
     this->point->Z += vz * speed;

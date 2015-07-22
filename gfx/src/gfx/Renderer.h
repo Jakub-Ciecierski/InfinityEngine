@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include "vector_types.h"
 
 // OpenGL includes
 #include <GL/glew.h>
@@ -15,6 +16,7 @@
 #include "../../include/SDL2/include/SDL.h"
 #include "../../include/SDL2/include/SDL_opengl.h"
 
+#include "ParticlesCreator.h"
 #include "shapes/Sphere.h"
 #include "shapes/Cube.h"
 #include "shapes/Triangle.h"
@@ -25,7 +27,7 @@
 #include "../util/GalaxyLoader.h"
 #include "util/BMPLoader.h"
 
-//#include "../cuda/GalaxyCollision.cuh"
+#include "../cuda/GalaxyCollision.cuh"
 
 int GFXInit(int argc, char** argv);
 

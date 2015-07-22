@@ -18,15 +18,20 @@ GLuint MatrixID;
 GLuint Texture;
 GLuint TextureID;
 
+GLuint CameraRight_worldspace_ID;
+GLuint CameraUp_worldspace_ID;
+GLuint ViewProjMatrixID;
+
+
 Triangle* triangle;
 Cube* cube;
 Sphere* sphere;
 Sphere* sphere1;
 Camera* camera;
 
-Star*** galaxies;
+Galaxy** galaxies;
 
-Galaxy** _galaxies;
+ParticlesCreator* particles;
 
 //  The number of frames
 int frameCount = 0;
@@ -52,44 +57,8 @@ void mouse(int button, int state, int x, int y);
 void mouseMove(int x, int y);
 void calculateFPS();
 
-void render2(void)
-{
-    glUseProgram(programID);
-
-    camera->Update();
-    calculateFPS();
-    
-    if(counter++ == 999) {
-    system("clear");
-    printf("FPS: %lf\n", fps);
-    counter = 0;
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
- 
-    //MVP = camera->ProjectionMatrix * camera->ViewMatrix * sphere->GetModelMatrix();
-    //glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    //sphere->Render();
-     
-    //galaxyCollisionInit(galaxies, GALAXY_COUNT, MAX_DISK_COUNT + MAX_BULGE_COUNT);    
-
-    for (int i = 0; i < GALAXY_COUNT; i++)
-    {
-        for (int j = 0; j < (MAX_DISK_COUNT + MAX_BULGE_COUNT); j++)
-        {
-            Star* star = galaxies[i][j];
-            
-            MVP = camera->ProjectionMatrix * camera->ViewMatrix * star->GetSphere()->GetModelMatrix();
-            glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-            star->GetSphere()->RenderTextureIndices();
-        }
-    }
-
-    glutSwapBuffers();
-
-    glutPostRedisplay();
-}
+void updateGalaxies();
+float4* getGalaxiesDescription(int count);
 
 void render(void)
 {
@@ -101,11 +70,11 @@ void render(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-     
-    //galaxyCollisionInit(galaxies, GALAXY_COUNT, MAX_DISK_COUNT + MAX_BULGE_COUNT);
+
+    updateGalaxies();
 
     //Sphere* i_sphere = _galaxies[0]->bulge[0]->GetSphere();
-    Point* i_sphere = _galaxies[0]->bulge[0]->GetPoint();
+    Point* i_sphere = galaxies[0]->bulge[0]->GetPoint();
     // Bind VBO etc
     int indiciesSize = i_sphere->indicesSize;
     
@@ -120,8 +89,8 @@ void render(void)
         int size;
         Star** stars;
 
-        stars = _galaxies[i]->disk;
-        size = _galaxies[i]->diskSize;
+        stars = galaxies[i]->disk;
+        size = galaxies[i]->diskSize;
         for (int j = 0; j < size; j++)
         {
             Star* star = stars[j];
@@ -132,8 +101,8 @@ void render(void)
             glDrawElements(GL_POINTS, indiciesSize, GL_UNSIGNED_SHORT, (void*)0 );
         }
 
-        stars = _galaxies[i]->bulge;
-        size = _galaxies[i]->bulgeSize;
+        stars = galaxies[i]->bulge;
+        size = galaxies[i]->bulgeSize;
         for (int j = 0; j < size; j++)
         {
             Star* star = stars[j];
@@ -144,8 +113,8 @@ void render(void)
             glDrawElements(GL_POINTS, indiciesSize, GL_UNSIGNED_SHORT, (void*)0 );
         }
         
-        stars = _galaxies[i]->halo;
-        size = _galaxies[i]->haloSize;
+        stars = galaxies[i]->halo;
+        size = galaxies[i]->haloSize;
         for (int j = 0; j < size; j++)
         {
             Star* star = stars[j];
@@ -163,6 +132,242 @@ void render(void)
 
     glutPostRedisplay();
 }
+
+void updateGalaxies()
+{
+	int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
+
+	float4* bodyDescription = getGalaxiesDescription(count);
+	float3* acceleration = (float3*)malloc(sizeof(float3) * count);
+
+	galaxyCollisionInit(bodyDescription, acceleration, count);
+
+    int index = 0;
+    for (int i = 0; i < GALAXY_COUNT; i++)
+	{
+		int size;
+		Star** stars;
+
+		stars = galaxies[i]->disk;
+		size = galaxies[i]->diskSize;
+		for (int j = 0; j < size; j++)
+		{
+			Star* star = stars[j];
+
+            float3 acc = acceleration[index++];
+            star->Update(acc.x, acc.y, acc.z);
+		}
+
+		stars = galaxies[i]->bulge;
+		size = galaxies[i]->bulgeSize;
+		for (int j = 0; j < size; j++)
+		{
+			Star* star = stars[j];
+
+            float3 acc = acceleration[index++];
+            star->Update(acc.x, acc.y, acc.z);
+		}
+
+		stars = galaxies[i]->halo;
+		size = galaxies[i]->haloSize;
+		for (int j = 0; j < size; j++)
+		{
+			Star* star = stars[j];
+
+            float3 acc = acceleration[index++];
+            star->Update(acc.x, acc.y, acc.z);
+		}
+	}
+
+    free(bodyDescription);
+	free(acceleration);
+}
+
+float4* getGalaxiesDescription(int count)
+{
+	//int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
+
+	//int sizef3 = count * sizeof(float3);
+	int sizef4 = count * sizeof(float4);
+
+	//fprintf(stderr, "[Cuda] Bodies Count: %d \n", count);
+
+	float4* bodyDescription = (float4*)malloc(sizef4);
+	//float3* acceleration = (float3*)malloc(sizef3);
+
+	int index = 0;
+
+	// Init the body description - position and mass
+	for (int i = 0; i < GALAXY_COUNT; i++)
+	{
+		int size;
+		Star** stars;
+
+		stars = galaxies[i]->disk;
+		size = galaxies[i]->diskSize;
+		for (int j = 0; j < size; j++)
+		{
+			Star* star = stars[j];
+
+			bodyDescription[index].x = star->x;
+			bodyDescription[index].y = star->y;
+			bodyDescription[index].z = star->z;
+			bodyDescription[index].w = star->mass;
+			index++;
+		}
+
+		stars = galaxies[i]->bulge;
+		size = galaxies[i]->bulgeSize;
+		for (int j = 0; j < size; j++)
+		{
+			Star* star = stars[j];
+
+			bodyDescription[index].x = star->x;
+			bodyDescription[index].y = star->y;
+			bodyDescription[index].z = star->z;
+			bodyDescription[index].w = star->mass;
+			index++;
+		}
+
+		stars = galaxies[i]->halo;
+		size = galaxies[i]->haloSize;
+		for (int j = 0; j < size; j++)
+		{
+			Star* star = stars[j];
+
+			bodyDescription[index].x = star->x;
+			bodyDescription[index].y = star->y;
+			bodyDescription[index].z = star->z;
+			bodyDescription[index].w = star->mass;
+			index++;
+		}
+	}
+	return bodyDescription;
+}
+
+///////////////////////////////// <PARTICLE STUFF> /////////////////////////////////////////
+
+void render3(void)
+{
+    camera->Update();
+    calculateFPS();
+
+    system("clear");
+    printf("FPS: %lf\n", fps);
+
+	int particleIndex = 0;
+
+	//fprintf(stderr, "render() 1\n");
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    glm::vec3 CameraPosition(glm::inverse(camera->ViewMatrix)[3]);
+    glm::mat4 ViewProjectionMatrix = camera->ProjectionMatrix * camera->ViewMatrix;
+
+
+    for (int i = 0; i < GALAXY_COUNT; i++)
+    {
+        int size;
+        Star** stars;
+
+        stars = galaxies[i]->disk;
+        size = galaxies[i]->diskSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
+            particles->g_position_size_data[4*particleIndex+0] = star->x;
+            particles->g_position_size_data[4*particleIndex+1] = star->y;
+            particles->g_position_size_data[4*particleIndex+2] = star->z;
+
+            particles->g_position_size_data[4*particleIndex+3] = 1.0f; // size
+
+            particles->g_color_data[4*particleIndex+0] = 1.0f; // R
+            particles->g_color_data[4*particleIndex+1] = 1.0f; // G
+            particles->g_color_data[4*particleIndex+2] = 1.0f; // B
+
+            particles->g_color_data[4*particleIndex+3] = 1.0f; // alpha
+
+    		particleIndex++;
+        }
+
+        stars = galaxies[i]->bulge;
+        size = galaxies[i]->bulgeSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
+            particles->g_position_size_data[4*particleIndex+0] = star->x;
+            particles->g_position_size_data[4*particleIndex+1] = star->y;
+            particles->g_position_size_data[4*particleIndex+2] = star->z;
+
+            particles->g_position_size_data[4*particleIndex+3] = 1.0f;
+
+            particles->g_color_data[4*particleIndex+0] = 1.0f; // R
+            particles->g_color_data[4*particleIndex+1] = 1.0f; // G
+            particles->g_color_data[4*particleIndex+2] = 1.0f; // B
+
+            particles->g_color_data[4*particleIndex+3] = 1.0f; // alpha
+
+    		particleIndex++;
+        }
+
+        stars = galaxies[i]->halo;
+        size = galaxies[i]->haloSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
+            particles->g_position_size_data[4*particleIndex+0] = star->x;
+            particles->g_position_size_data[4*particleIndex+1] = star->y;
+            particles->g_position_size_data[4*particleIndex+2] = star->z;
+
+            particles->g_position_size_data[4*particleIndex+3] = 1.0f;
+
+            particles->g_color_data[4*particleIndex+0] = 1.0f; // R
+            particles->g_color_data[4*particleIndex+1] = 1.0f; // G
+            particles->g_color_data[4*particleIndex+2] = 1.0f; // B
+
+            particles->g_color_data[4*particleIndex+3] = 1.0f; // alpha
+
+    		particleIndex++;
+        }
+    }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Texture);
+    // Set our "myTextureSampler" sampler to user Texture Unit 0
+    glUniform1i(TextureID, 0);
+
+    glUniform3f(CameraRight_worldspace_ID, camera->ViewMatrix[0][0],
+    					camera->ViewMatrix[1][0], camera->ViewMatrix[2][0]);
+    glUniform3f(CameraUp_worldspace_ID , camera->ViewMatrix[0][1],
+    		camera->ViewMatrix[1][1], camera->ViewMatrix[2][1]);
+
+    glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+
+    //fprintf(stderr, "before drawarrays\n");
+
+    particles->BindVBO();
+
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particles->particleCount);
+
+    particles->UnBindVBO();
+
+    glutSwapBuffers();
+
+    glutPostRedisplay();
+}
+
+void createParticles(int particleCount)
+{
+	fprintf(stderr, "createParticles 1\n");
+	particles = new ParticlesCreator(particleCount);
+	fprintf(stderr, "createParticles 2\n");
+}
+
+///////////////////////////////// </PARTICLE STUFF> /////////////////////////////////////////
 
 void bindVBO(GLuint vertexbuffer, GLuint uvbuffer, GLuint elementbuffer, int indiciesSize)
 {
@@ -312,14 +517,15 @@ int GFXInit(int argc, char** argv)
     initSampleObjects();
 
     //galaxies = gllParse(argv[1], Texture, TextureID);
-    _galaxies = glxParseGalaxies(argv[1]);
+    galaxies = glxParseGalaxies(argv[1]);
+
+    createParticles(galaxies[0]->TotalSize() + galaxies[1]->TotalSize());
 
     printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
     
     glutMainLoop();
 
-    delete galaxies;
-    delete _galaxies;
+    delete[] galaxies;
 
     return EXIT_SUCCESS;
 }
@@ -364,6 +570,10 @@ int initEvents()
 
 int initProgram()
 {
+	CameraRight_worldspace_ID  = glGetUniformLocation(programID, "CameraRight_worldspace");
+	CameraUp_worldspace_ID  = glGetUniformLocation(programID, "CameraUp_worldspace");
+	ViewProjMatrixID = glGetUniformLocation(programID, "VP");
+
     // VAO
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
@@ -372,9 +582,18 @@ int initProgram()
     fprintf(stderr, "Current WD: %s\n", get_current_dir_name());
 
     // Load shaders
-    //programID = LoadShaders("src/gfx/shaders/VertexShader.vert", "src/gfx/shaders/FragmentShader.frag");
+    /*
+    programID = LoadShaders("src/gfx/shaders/ParticleVertexShader.vert",
+        		"src/gfx/shaders/ParticleFragmentShader.frag");
+    */
+    /*
+    programID = LoadShaders("src/gfx/shaders/VertexShader.vert",
+    		"src/gfx/shaders/FragmentShader.frag");
+
+    */
     programID = LoadShaders("src/gfx/shaders/TextureVertexShader.vert", 
             "src/gfx/shaders/TextureFragmentShader.frag");
+
     glUseProgram(programID);
     
     // Get a handle for our "MVP" uniform.

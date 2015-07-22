@@ -1,8 +1,8 @@
 #include "GalaxyLoader.h"
 
-float posFactor = 1.0f;
-float massFactor = 1.0f;
-float velFactor = 1.0f;
+float posFactor = 1.5f;
+float massFactor = 120000.0f;
+float velFactor = 8.0f;
 
 extern GLuint Texture;
 extern GLuint TextureID;
@@ -408,6 +408,7 @@ Galaxy** glxParseGalaxies(const char* dir)
     galaxies[0] = new Galaxy(mw_disk, mw_bulge, mw_halo, 
                             mw_disk_size, mw_bulge_size, mw_halo_size);
     
+    fprintf(stderr, "Galaxy1 count: %d stars\n\n", mw_halo_size + mw_bulge_size + mw_disk_size);
     
     /********* AND *********/
     
@@ -445,5 +446,10 @@ Galaxy** glxParseGalaxies(const char* dir)
     galaxies[1] = new Galaxy(and_disk, and_bulge, and_halo, 
                             and_disk_size, and_bulge_size, and_halo_size);
     
+    fprintf(stderr, "Galaxy2 count: %d stars\n\n", and_halo_size + and_bulge_size + and_disk_size);
+
+    fprintf(stderr, "Galaxy1 count: %d\n", galaxies[0]->TotalSize());
+    fprintf(stderr, "Galaxy2 count: %d\n", galaxies[1]->TotalSize());
+
     return galaxies;
 }

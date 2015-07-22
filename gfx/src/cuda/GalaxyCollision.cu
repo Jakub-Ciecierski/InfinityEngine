@@ -1,9 +1,9 @@
 #include "GalaxyCollision.cuh"
 
 __device__
-float3 bodiesInteraction(float4 body1, float4 body2, float3 acceleration)
+float3 bodiesInteraction2(float4 body1, float4 body2, float3 acceleration)
 {
-    float EPS2 = 0.0001f;
+    float EPS2 = 0.1f;
     float3 r;
 
     r.x = body2.x - body1.x;
@@ -30,17 +30,18 @@ float3 bodiesInteraction(float4 body1, float4 body2, float3 acceleration)
 }
 
 __device__
-float3 bodiesInteraction2(float4 body1, float4 body2, float3 acceleration)
+float3 bodiesInteraction(float4 body1, float4 body2, float3 acceleration)
 {
-    float EPS2 = 0.0001f;
+    float EPS2 = 0.01f;
+    float ep = 0.67f;
 
     float3 r;
     r.x = body2.x - body1.x;
     r.y = body2.y - body1.y;
     r.z = body2.z - body1.z;
 
-    float distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z);
-    distSqr *= distSqr;
+    float distSqr = r.x * r.x + r.y * r.y + r.z * r.z;
+    //distSqr *= distSqr;
     distSqr += EPS2;
 
     float dist = sqrtf(distSqr);
@@ -48,9 +49,9 @@ float3 bodiesInteraction2(float4 body1, float4 body2, float3 acceleration)
 
     float s = body2.w / distCube;
 
-    acceleration.x += r.x * s;
-    acceleration.y += r.y * s;
-    acceleration.z += r.z * s;
+    acceleration.x += r.x * s * ep;
+    acceleration.y += r.y * s * ep;
+    acceleration.z += r.z * s * ep;
 
     return acceleration;
 }
@@ -113,54 +114,33 @@ void galaxyCollisionLogic(float4* d_bodyDescription, float3* d_acceleration, int
 }
 
 __host__
-void galaxyCollisionInit(Star*** galaxies, int galaxyCount, int n)
+void galaxyCollisionInit(float4* bodyDescription, float3* acceleration, int count)
 {
-    int count = n * galaxyCount;
+    float4* d_bodyDescription;
+    float3* d_acceleration;
 
     int sizef3 = count * sizeof(float3);
     int sizef4 = count * sizeof(float4);
 
-    //fprintf(stderr, "[Cuda] Bodies Count: %d \n", count);
-
-    float4* bodyDescription = (float4*)malloc(sizef4);
-    float3* acceleration = (float3*)malloc(sizef3);
-
-    // Init the body description - position and mass
-    for (int i = 0; i < galaxyCount; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            Star* star = galaxies[i][j];
-
-            bodyDescription[i*n + j].x = star->x;
-            bodyDescription[i*n + j].y = star->y;
-            bodyDescription[i*n + j].z = star->z;
-            bodyDescription[i*n + j].w = star->mass;
-        }
-    }
-
-    float4* d_bodyDescription;
-    float3* d_acceleration;
-
     cudaError_t err;
 
     /*********** MEMORY ALLOCATION ***********/
-    if ((err = cudaMalloc((void**)&d_bodyDescription, sizef4)) != cudaSuccess) ERR(err);
-    if ((err = cudaMalloc((void**)&d_acceleration, sizef3)) != cudaSuccess) ERR(err);
+    if ((err = cudaMalloc((void**)&d_bodyDescription, sizef4)) != cudaSuccess) C_ERR(err);
+    if ((err = cudaMalloc((void**)&d_acceleration, sizef3)) != cudaSuccess) C_ERR(err);
 
     /*********** COPY MEMORY TO DEVICE ***********/
-    if ((err = cudaMemcpy(d_bodyDescription, bodyDescription, sizef4, cudaMemcpyHostToDevice)) != cudaSuccess) ERR(err);
+    if ((err = cudaMemcpy(d_bodyDescription, bodyDescription, sizef4, cudaMemcpyHostToDevice)) != cudaSuccess) C_ERR(err);
     //if ((err = cudaMemcpy(d_acceleration, acceleration, sizef3, cudaMemcpyHostToDevice)) != cudaSuccess) ERR(err);
 
     // Work
     galaxyCollisionLogic(d_bodyDescription, d_acceleration, count);
 
     /*********** COPY MEMORY BACK TO HOST ***********/
-    if ((err = cudaMemcpy(acceleration, d_acceleration, sizef3, cudaMemcpyDeviceToHost)) != cudaSuccess) ERR(err);
+    if ((err = cudaMemcpy(acceleration, d_acceleration, sizef3, cudaMemcpyDeviceToHost)) != cudaSuccess) C_ERR(err);
 
     /*********** FREE MEMORY ***********/
-    if ((err = cudaFree(d_bodyDescription)) != cudaSuccess) ERR(err);
-    if ((err = cudaFree(d_acceleration)) != cudaSuccess) ERR(err);
+    if ((err = cudaFree(d_bodyDescription)) != cudaSuccess) C_ERR(err);
+    if ((err = cudaFree(d_acceleration)) != cudaSuccess) C_ERR(err);
 
     // Update galaxies ...
     /*
@@ -169,17 +149,5 @@ void galaxyCollisionInit(Star*** galaxies, int galaxyCount, int n)
         printf("Acc: %lf, %lf, %lf\n", acceleration[i].x, acceleration[i].y, acceleration[i].z);
     }*/
 
-    for (int i = 0; i < galaxyCount; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            Star* star = galaxies[i][j];
-
-            float3 acc = acceleration[i*n + j];
-            star->Update(acc.x, acc.y, acc.z);
-        }
-    }
-
-    free(bodyDescription);
-    free(acceleration);
+    // Init the body description - position and mass
 }

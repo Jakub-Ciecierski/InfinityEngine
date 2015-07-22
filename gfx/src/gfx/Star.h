@@ -21,7 +21,7 @@ private:
 
     float const width = 10.0f;
 
-    float speed = 0.5f;
+    float speed = 0.001f;
     int oldTimeSinceStart = 0;
 
     Sphere* sphere;

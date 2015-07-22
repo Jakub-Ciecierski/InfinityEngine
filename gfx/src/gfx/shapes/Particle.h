@@ -1,4 +1,12 @@
-#pragma once
+/*
+ * Particle.h
+ *
+ *  Created on: Jul 22, 2015
+ *      Author: jakub
+ */
+
+#ifndef PARTICLE_H_
+#define PARTICLE_H_
 
 #include <stdio.h>
 
@@ -7,14 +15,12 @@
 #include "../../../include/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
 
-class Point
+class Particle
 {
 private:
-
-
     glm::mat4 Model;
     int counter = 0;
-    
+
     void init();
 
     void initVertices();
@@ -23,7 +29,7 @@ private:
     void initIndices();
 
 public:
-    
+
     // This will identify our vertex buffer
     GLuint vertexbuffer;
     GLuint colorbuffer;
@@ -34,7 +40,7 @@ public:
     GLuint TextureID;
 
     int indicesSize = 1;
-    
+
     float X;
     float Y;
     float Z;
@@ -46,15 +52,18 @@ public:
     float ScaleX;
     float ScaleY;
     float ScaleZ;
-    
-    Point();
-    Point(float x, float y, float z);
-    Point(float x, float y, float z, GLuint texture, GLuint textureID);
+
+    Particle();
+    Particle(float x, float y, float z);
+    Particle(float x, float y, float z, GLuint texture, GLuint textureID);
 
     void Render();
     void RenderTexture();
     void RenderTextureIndices();
-    
+
     glm::mat4 GetModelMatrix();
 };
 
+
+
+#endif /* PARTICLE_H_ */

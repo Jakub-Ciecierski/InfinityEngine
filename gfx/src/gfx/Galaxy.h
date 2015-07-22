@@ -29,6 +29,7 @@ public:
     Star** bulge;
     Star** halo;
 
+    int TotalSize();
 private:
 
 };

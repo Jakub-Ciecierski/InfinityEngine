@@ -18,6 +18,7 @@ Point::Point(float x, float y, float z)
 
     initVertices();
     initColor();
+    initIndices();
 }
 
 Point::Point(float x, float y, float z, GLuint texture, GLuint textureID)

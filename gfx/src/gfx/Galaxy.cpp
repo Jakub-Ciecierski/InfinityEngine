@@ -11,7 +11,7 @@ Galaxy::Galaxy() {
 }
 
 Galaxy::Galaxy(Star** disk, Star** bulge, Star** halo,
-            int disksize, int bulgeSize, int haloSize)
+            int diskSize, int bulgeSize, int haloSize)
 {
     this->disk = disk;
     this->bulge = bulge;
@@ -31,3 +31,7 @@ Galaxy::~Galaxy() {
     delete halo;
 }
 
+int Galaxy::TotalSize()
+{
+	return diskSize + bulgeSize + haloSize;
+}
