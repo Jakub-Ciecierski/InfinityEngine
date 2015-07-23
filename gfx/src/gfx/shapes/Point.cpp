@@ -78,7 +78,8 @@ void Point::initTexture()
 {
     // Two UV coordinatesfor each vertex. They were created withe Blender.
      static const GLfloat g_uv_buffer_data[] = {
-             0.000059f, 1.0f-0.000004f,
+        //0.000059f, 1.0f-0.000004f,
+         0.10059f, 1.0f-0.000004f,
      };
 
      glGenBuffers(1, &uvbuffer);

@@ -1,9 +1,13 @@
 #pragma once
 
+#include <iostream>
+#include <string.h>
+
 #include "shapes/Sphere.h"
 #include "shapes/Point.h"
-//#include "../util/Time.h"
 #include <GL/freeglut.h>
+
+using namespace std;
 
 #define GLX_MW 0
 #define GLX_AND 1
@@ -48,5 +52,7 @@ public:
     Sphere* GetSphere();
     
     Point* GetPoint();
+    
+    friend ostream& operator<<(ostream& os, Star& star);
 };
 

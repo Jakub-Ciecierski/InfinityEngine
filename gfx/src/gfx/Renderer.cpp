@@ -135,52 +135,52 @@ void render(void)
 
 void updateGalaxies()
 {
-	int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
+    int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
 
-	float4* bodyDescription = getGalaxiesDescription(count);
-	float3* acceleration = (float3*)malloc(sizeof(float3) * count);
+    float4* bodyDescription = getGalaxiesDescription(count);
+    float3* acceleration = (float3*)malloc(sizeof(float3) * count);
 
-	galaxyCollisionInit(bodyDescription, acceleration, count);
+    galaxyCollisionInit(bodyDescription, acceleration, count);
 
     int index = 0;
     for (int i = 0; i < GALAXY_COUNT; i++)
-	{
-		int size;
-		Star** stars;
+    {
+        int size;
+        Star** stars;
 
-		stars = galaxies[i]->disk;
-		size = galaxies[i]->diskSize;
-		for (int j = 0; j < size; j++)
-		{
-			Star* star = stars[j];
+        stars = galaxies[i]->disk;
+        size = galaxies[i]->diskSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
 
-            float3 acc = acceleration[index++];
-            star->Update(acc.x, acc.y, acc.z);
-		}
+        float3 acc = acceleration[index++];
+        star->Update(acc.x, acc.y, acc.z);
+        }
 
-		stars = galaxies[i]->bulge;
-		size = galaxies[i]->bulgeSize;
-		for (int j = 0; j < size; j++)
-		{
-			Star* star = stars[j];
+        stars = galaxies[i]->bulge;
+        size = galaxies[i]->bulgeSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
 
-            float3 acc = acceleration[index++];
-            star->Update(acc.x, acc.y, acc.z);
-		}
+        float3 acc = acceleration[index++];
+        star->Update(acc.x, acc.y, acc.z);
+        }
 
-		stars = galaxies[i]->halo;
-		size = galaxies[i]->haloSize;
-		for (int j = 0; j < size; j++)
-		{
-			Star* star = stars[j];
+        stars = galaxies[i]->halo;
+        size = galaxies[i]->haloSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
 
-            float3 acc = acceleration[index++];
-            star->Update(acc.x, acc.y, acc.z);
-		}
-	}
+        float3 acc = acceleration[index++];
+        star->Update(acc.x, acc.y, acc.z);
+        }
+    }
 
     free(bodyDescription);
-	free(acceleration);
+    free(acceleration);
 }
 
 float4* getGalaxiesDescription(int count)
@@ -207,39 +207,39 @@ float4* getGalaxiesDescription(int count)
 		size = galaxies[i]->diskSize;
 		for (int j = 0; j < size; j++)
 		{
-			Star* star = stars[j];
+                    Star* star = stars[j];
 
-			bodyDescription[index].x = star->x;
-			bodyDescription[index].y = star->y;
-			bodyDescription[index].z = star->z;
-			bodyDescription[index].w = star->mass;
-			index++;
+                    bodyDescription[index].x = star->x;
+                    bodyDescription[index].y = star->y;
+                    bodyDescription[index].z = star->z;
+                    bodyDescription[index].w = star->mass;
+                    index++;
 		}
 
 		stars = galaxies[i]->bulge;
 		size = galaxies[i]->bulgeSize;
 		for (int j = 0; j < size; j++)
 		{
-			Star* star = stars[j];
+                    Star* star = stars[j];
 
-			bodyDescription[index].x = star->x;
-			bodyDescription[index].y = star->y;
-			bodyDescription[index].z = star->z;
-			bodyDescription[index].w = star->mass;
-			index++;
+                    bodyDescription[index].x = star->x;
+                    bodyDescription[index].y = star->y;
+                    bodyDescription[index].z = star->z;
+                    bodyDescription[index].w = star->mass;
+                    index++;
 		}
 
 		stars = galaxies[i]->halo;
 		size = galaxies[i]->haloSize;
 		for (int j = 0; j < size; j++)
 		{
-			Star* star = stars[j];
+                    Star* star = stars[j];
 
-			bodyDescription[index].x = star->x;
-			bodyDescription[index].y = star->y;
-			bodyDescription[index].z = star->z;
-			bodyDescription[index].w = star->mass;
-			index++;
+                    bodyDescription[index].x = star->x;
+                    bodyDescription[index].y = star->y;
+                    bodyDescription[index].z = star->z;
+                    bodyDescription[index].w = star->mass;
+                    index++;
 		}
 	}
 	return bodyDescription;

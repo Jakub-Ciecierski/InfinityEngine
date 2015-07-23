@@ -101,6 +101,9 @@ int bind_local_socket(char *name, int type, int backlog){
  * binds and finally if it is a SOCK_STREAM socket, makes it a listening socket.
  * 
  * (*)  For more info refer to: man setsockopt
+ *      or see the section:
+ *      http://www.gnu.org/software/libc/manual/html_node/Socket-Options.html
+ * 
  *      SOL_SOCKET:
  *      Use this constant as the level argument to getsockopt or setsockopt to 
  *      manipulate the socket-level options described in this section.
@@ -134,6 +137,14 @@ int bind_inet_socket(uint16_t port,int type, int backlog){
     return socketfd;
 }
 
+/**
+ * Makes a socket, makes an address structure and finally connects
+ * to given socket.
+ * @param name
+ *      Name of the socket
+ * @return 
+ *      Socket descriptor
+ */
 int connect_local_socket(char *name){
     struct sockaddr_un addr;
     int socketfd;
@@ -158,10 +169,14 @@ int connect_local_socket(char *name){
 }
 
 /**
- * Makes a socket, makes an address structure
- * @param name
+ * Makes a socket, makes an address structure and finally connects
+ * to given socket.
+ * @param address
+ *      IPv4 Address
  * @param port
+ *      Port
  * @return 
+ *      The socket descriptor
  */
 int connect_inet_socket(char *address, uint16_t port){
     struct sockaddr_in addr;

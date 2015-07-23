@@ -54,3 +54,5 @@ Galaxy** glxParseGalaxies(const char* dir);
 
 Star*** gllParse_old(const char* filename);
 Star*** gllParse(const char* filename, GLuint Texture, GLuint TextureID);
+
+void printSampleStars(Galaxy** galaxies);

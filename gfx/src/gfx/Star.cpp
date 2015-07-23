@@ -88,3 +88,37 @@ Point* Star::GetPoint()
 {
     return this->point;
 }     
+
+ ostream& operator<< (ostream& os, Star& star)
+ {
+    std::string galaxy_type;
+    std::string star_type;
+
+    if(star.galaxyType == GLX_MW)
+        galaxy_type = "Milky Way";
+    else if(star.galaxyType == GLX_AND)
+        galaxy_type = "Andromeda";
+    else
+        galaxy_type = "Unknown";
+    if(star.starType == GLX_DISK)
+        star_type = "Disk";
+    else if(star.starType == GLX_BULGE)
+        star_type = "Bulge";
+    else if(star.starType == GLX_HALO)
+        star_type = "Halo";
+    else
+        star_type = "Unknown";            
+                 
+    os << "Galaxy: " << galaxy_type
+            << ", "
+            << "Type: " << star_type
+            << "\n"
+            << "Mass: " << star.mass
+            << "\n"
+            << "Position (x,y,z): " 
+                << "(" << star.x << ", " 
+                << star.y << ", " 
+                << star.z << ")"
+            << endl;
+    return os;
+ }

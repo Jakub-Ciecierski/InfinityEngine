@@ -13,11 +13,12 @@
 #include <stdlib.h>
 
 #define ERR(source) (fprintf(stderr,"%s:%d\n",__FILE__,__LINE__),\
-                     perror(source),kill(0,SIGKILL),\
-		     		     exit(EXIT_FAILURE))
+                        perror(source),kill(0,SIGKILL),\
+                        exit(EXIT_FAILURE))
+
 #define HERR(source) (fprintf(stderr,"%s(%d) at %s:%d\n",\
-						source,h_errno,__FILE__,__LINE__),\
-						perror(source),kill(0,SIGKILL),\
-						exit(EXIT_FAILURE))
+                        source,h_errno,__FILE__,__LINE__),\
+                        perror(source),kill(0,SIGKILL),\
+                        exit(EXIT_FAILURE))
 	     
 #endif

@@ -3,26 +3,26 @@
 __device__ int doPrint = 0;
 
 __device__
-float3 bodiesInteraction2(float4 body1, float4 body2, float3 acceleration)
+float3 bodiesInteraction2(double4 body1, double4 body2, double3 acceleration)
 {
-    float EPS2 = 0.1f;
-    float3 r;
+    double EPS2 = 0.1f;
+    double3 r;
 
     r.x = body2.x - body1.x;
     r.y = body2.y - body1.y;
     r.z = body2.z - body1.z;
 
     // distSqr = dot(r_ij, r_ij) + EPS^2  [6 FLOPS]  
-    float distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z);
+    double distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z);
     distSqr *= distSqr;
     distSqr += EPS2;
 
     // invDistCube =1/distSqr^(3/2)  [4 FLOPS (2 mul, 1 sqrt, 1 inv)]  
-    float distSixth = distSqr * distSqr * distSqr;
-    float invDistCube = 1.0f / sqrtf(distSixth);
+    double distSixth = distSqr * distSqr * distSqr;
+    double invDistCube = 1.0f / sqrtf(distSixth);
 
     // s = m_j * invDistCube [1 FLOP]  
-    float s = body2.w * invDistCube;
+    double s = body2.w * invDistCube;
 
     acceleration.x += r.x * s;
     acceleration.y += r.y * s;
@@ -32,26 +32,26 @@ float3 bodiesInteraction2(float4 body1, float4 body2, float3 acceleration)
 }
 
 __device__
-float3 bodiesInteraction(float4 body1, float4 body2, float3 acceleration)
+float3 bodiesInteraction(double4 body1, double4 body2, double3 acceleration)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    float EPS2 = 0.01f;
-    float ep = 1.0f;
+    double EPS2 = 0.01f;
+    double ep = 1.0f;
 
-    float3 r;
+    double3 r;
     r.x = body2.x - body1.x;
     r.y = body2.y - body1.y;
     r.z = body2.z - body1.z;
 
-    float distSqr = (r.x * r.x) + (r.y * r.y) + (r.z * r.z);
+    double distSqr = (r.x * r.x) + (r.y * r.y) + (r.z * r.z);
     //distSqr *= distSqr;
     distSqr += EPS2;
 
-    float dist = sqrtf(distSqr);
-    float distCube = dist * dist * dist;
+    double dist = sqrtf(distSqr);
+    double distCube = dist * dist * dist;
 
-    float s = (body2.w) / distCube;
+    double s = (body2.w) / distCube;
 
     acceleration.x += r.x * s * ep;
     acceleration.y += r.y * s * ep;
@@ -89,7 +89,7 @@ float3 bodiesInteraction(float4 body1, float4 body2, float3 acceleration)
 }
 
 __device__ 
-float3 tileAcceleration2(float4 currPosition, float3 acceleration)
+float3 tileAcceleration2(double4 currPosition, double3 acceleration)
 {
     int i;
     extern __shared__ float4 shPosition[];
@@ -100,7 +100,7 @@ float3 tileAcceleration2(float4 currPosition, float3 acceleration)
 }
 
 __device__ 
-float3 tileAcceleration(float4 currPosition, float3 acceleration)
+float3 tileAcceleration(double4 currPosition, double3 acceleration)
 {
     int i;
     extern __shared__ float4 shPosition[];
@@ -111,15 +111,15 @@ float3 tileAcceleration(float4 currPosition, float3 acceleration)
 }
 
 __global__
-void calculateForcesKernel2(float4* bodyDescription, float3* acceleration, int size)
+void calculateForcesKernel2(double4* bodyDescription, double3* acceleration, int size)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < size)
     {
         extern __shared__ float4 shPosition[];
 
-        float4 currPosition;
-        float3 acc = { 0.0f, 0.0f, 0.0f };
+        double4 currPosition;
+        double3 acc = { 0.0f, 0.0f, 0.0f };
 
         int i, tile;
 
@@ -143,7 +143,7 @@ void calculateForcesKernel2(float4* bodyDescription, float3* acceleration, int s
 
 
 __global__
-void calculateForcesKernel(float4* bodyDescription, float3* acceleration, int size)
+void calculateForcesKernel(double4* bodyDescription, double3* acceleration, int size)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < size)
@@ -170,7 +170,7 @@ void calculateForcesKernel(float4* bodyDescription, float3* acceleration, int si
 }
 
 __host__
-void galaxyCollisionLogic(float4* d_bodyDescription, float3* d_acceleration, int size)
+void galaxyCollisionLogic(double4* d_bodyDescription, double3* d_acceleration, int size)
 {
     double4 test;
     dim3 DimGrid((size / MAX_BLOCK_THREAD_COUNT) + 1, 1, 1);
@@ -188,13 +188,13 @@ void galaxyCollisionLogic(float4* d_bodyDescription, float3* d_acceleration, int
 }
 
 __host__
-void galaxyCollisionInit(float4* bodyDescription, float3* acceleration, int count)
+void galaxyCollisionInit(double4* bodyDescription, double3* acceleration, int count)
 {
-    float4* d_bodyDescription;
-    float3* d_acceleration;
+    double4* d_bodyDescription;
+    double3* d_acceleration;
 
-    int sizef3 = count * sizeof(float3);
-    int sizef4 = count * sizeof(float4);
+    int sizef3 = count * sizeof(double3);
+    int sizef4 = count * sizeof(double4);
 
     cudaError_t err;
 
