@@ -52,7 +52,4 @@ using namespace std;
 Star** getStars(char* filepath, int maxSize, int glx_name, int glx_type, int* size);
 Galaxy** glxParseGalaxies(const char* dir);
 
-Star*** gllParse_old(const char* filename);
-Star*** gllParse(const char* filename, GLuint Texture, GLuint TextureID);
-
 void printSampleStars(Galaxy** galaxies);
