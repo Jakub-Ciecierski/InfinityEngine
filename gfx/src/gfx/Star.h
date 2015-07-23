@@ -29,11 +29,11 @@ private:
     int oldTimeSinceStart = 0;
 
     Sphere* sphere;
-    Point* point;
-public:
-
-    float mass;
     float x, y, z;
+public:
+    Point* point;
+    float mass;
+    
     float vx, vy, vz;
 
     Star();

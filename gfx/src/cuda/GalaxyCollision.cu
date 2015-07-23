@@ -89,17 +89,6 @@ float3 bodiesInteraction(float4 body1, float4 body2, float3 acceleration)
 }
 
 __device__ 
-float3 tileAcceleration2(float4 currPosition, float3 acceleration)
-{
-    int i;
-    extern __shared__ float4 shPosition[];
-    for (i = 0; i < blockDim.x; i++) {
-        acceleration = bodiesInteraction(currPosition, shPosition[i], acceleration);
-    }
-    return acceleration;
-}
-
-__device__ 
 float3 tileAcceleration(float4 currPosition, float3 acceleration)
 {
     int i;
@@ -111,7 +100,7 @@ float3 tileAcceleration(float4 currPosition, float3 acceleration)
 }
 
 __global__
-void calculateForcesKernel2(float4* bodyDescription, float3* acceleration, int size)
+void calculateForcesKernel(float4* bodyDescription, float3* acceleration, int size)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < size)
@@ -132,34 +121,6 @@ void calculateForcesKernel2(float4* bodyDescription, float3* acceleration, int s
                 __syncthreads();
                 acc = tileAcceleration(currPosition, acc);
                 __syncthreads();
-            }
-            
-        }
-
-        // Save the result in global memory for the integration step.  
-        acceleration[tid] = acc;
-    }
-}
-
-
-__global__
-void calculateForcesKernel(float4* bodyDescription, float3* acceleration, int size)
-{
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < size)
-    {
-        extern __shared__ float4 shPosition[];
-
-        float4 currPosition;
-        float3 acc = { 0.0f, 0.0f, 0.0f };
-
-        int i;
-
-        currPosition = bodyDescription[tid];
-        for (i = 0; i < size; i++)
-        {
-            if (i < size){
-                acc = bodiesInteraction(currPosition, bodyDescription[i], acc);
             }
             
         }

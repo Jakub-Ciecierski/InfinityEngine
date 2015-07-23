@@ -209,9 +209,9 @@ float4* getGalaxiesDescription(int count)
 		{
                     Star* star = stars[j];
 
-                    bodyDescription[index].x = star->x;
-                    bodyDescription[index].y = star->y;
-                    bodyDescription[index].z = star->z;
+                    bodyDescription[index].x = star->point->X;
+                    bodyDescription[index].y = star->point->Y;
+                    bodyDescription[index].z = star->point->Z;
                     bodyDescription[index].w = star->mass;
                     index++;
 		}
@@ -222,9 +222,9 @@ float4* getGalaxiesDescription(int count)
 		{
                     Star* star = stars[j];
 
-                    bodyDescription[index].x = star->x;
-                    bodyDescription[index].y = star->y;
-                    bodyDescription[index].z = star->z;
+                    bodyDescription[index].x = star->point->X;
+                    bodyDescription[index].y = star->point->Y;
+                    bodyDescription[index].z = star->point->Z;
                     bodyDescription[index].w = star->mass;
                     index++;
 		}
@@ -235,9 +235,9 @@ float4* getGalaxiesDescription(int count)
 		{
                     Star* star = stars[j];
 
-                    bodyDescription[index].x = star->x;
-                    bodyDescription[index].y = star->y;
-                    bodyDescription[index].z = star->z;
+                    bodyDescription[index].x = star->point->X;
+                    bodyDescription[index].y = star->point->Y;
+                    bodyDescription[index].z = star->point->Z;
                     bodyDescription[index].w = star->mass;
                     index++;
 		}
@@ -276,9 +276,9 @@ void render3(void)
         for (int j = 0; j < size; j++)
         {
             Star* star = stars[j];
-            particles->g_position_size_data[4*particleIndex+0] = star->x;
-            particles->g_position_size_data[4*particleIndex+1] = star->y;
-            particles->g_position_size_data[4*particleIndex+2] = star->z;
+            particles->g_position_size_data[4*particleIndex+0] = star->point->X;
+            particles->g_position_size_data[4*particleIndex+1] = star->point->Y;
+            particles->g_position_size_data[4*particleIndex+2] = star->point->Z;
 
             particles->g_position_size_data[4*particleIndex+3] = 1.0f; // size
 
@@ -296,9 +296,9 @@ void render3(void)
         for (int j = 0; j < size; j++)
         {
             Star* star = stars[j];
-            particles->g_position_size_data[4*particleIndex+0] = star->x;
-            particles->g_position_size_data[4*particleIndex+1] = star->y;
-            particles->g_position_size_data[4*particleIndex+2] = star->z;
+            particles->g_position_size_data[4*particleIndex+0] = star->point->X;
+            particles->g_position_size_data[4*particleIndex+1] = star->point->Y;
+            particles->g_position_size_data[4*particleIndex+2] = star->point->Z;
 
             particles->g_position_size_data[4*particleIndex+3] = 1.0f;
 
@@ -316,9 +316,9 @@ void render3(void)
         for (int j = 0; j < size; j++)
         {
             Star* star = stars[j];
-            particles->g_position_size_data[4*particleIndex+0] = star->x;
-            particles->g_position_size_data[4*particleIndex+1] = star->y;
-            particles->g_position_size_data[4*particleIndex+2] = star->z;
+            particles->g_position_size_data[4*particleIndex+0] = star->point->X;
+            particles->g_position_size_data[4*particleIndex+1] = star->point->Y;
+            particles->g_position_size_data[4*particleIndex+2] = star->point->Z;
 
             particles->g_position_size_data[4*particleIndex+3] = 1.0f;
 
