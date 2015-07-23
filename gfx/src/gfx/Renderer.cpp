@@ -676,7 +676,7 @@ int initSampleObjects()
     sphere = new Sphere(0, 0, 0);
     //sphere = new Sphere(0.5f, 0.5f, 0.5f, 0.002f);
     cube = new Cube();
-    camera = new Camera(0.0f, 0.0f, 50.0f);
+    camera = new Camera(0.0f, 0.0f, 1.0f);
 
     return 0;
 }

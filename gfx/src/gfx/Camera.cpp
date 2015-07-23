@@ -43,6 +43,8 @@ void Camera::init()
 
 void Camera::Update()
 {
+	//position = glm::vec3(x, y, z);
+
     // Direction : Spherical coordinates to Cartesian coordinates conversion
     direction = glm::vec3(
         cos(verticalAngle) * sin(horizontalAngle),
