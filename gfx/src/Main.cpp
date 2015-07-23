@@ -12,8 +12,8 @@ void usage(char* program)
 int main(int argc, char** argv)
 {
     if(argc != 2){
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+        //usage(argv[0]);
+        //exit(EXIT_FAILURE);
     }
     GFXInit(argc, argv);
 

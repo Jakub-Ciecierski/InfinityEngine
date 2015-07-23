@@ -1,7 +1,7 @@
 #include "GalaxyLoader.h"
 
-float posFactor = 1.0f;
-float massFactor = 100000.0f;
+float posFactor = 0.2f;
+float massFactor = 1000.0f;
 float velFactor = 10.0f;
 
 extern GLuint Texture;

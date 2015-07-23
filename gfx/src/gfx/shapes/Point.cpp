@@ -8,7 +8,7 @@ Point::Point()
     ScaleX = ScaleY = ScaleZ = 0.2f;
 
     initVertices();
-	initColor();
+    initColor();
 }
 
 Point::Point(float x, float y, float z)
@@ -26,11 +26,16 @@ Point::Point(float x, float y, float z, GLuint texture, GLuint textureID)
     X = x; Y = y; Z = z;
     ScaleX = ScaleY = ScaleZ = 1.0f;
 
+    R = 1.0f; 
+    G = 1.0f;
+    B = 0.50f;
+    
     this->Texture = texture;
     this->TextureID = textureID;
 
     initVertices();
-    initTexture();
+    //initTexture();
+    initColor();
     initIndices();
 }
 
@@ -57,12 +62,8 @@ void Point::initVertices()
 
 void Point::initColor()
 {
-    float r = 1.0f; 
-    float g = 1.0f;
-    float b = 0.50f;
-
-    static const GLfloat g_color_buffer_data[] = {
-        r, g, b,
+    const GLfloat g_color_buffer_data[] = {
+        R, G, B,
     };
 
     /***** Color Buffer *******/
@@ -109,6 +110,34 @@ glm::mat4 Point::GetModelMatrix()
     glm::mat4 Model = TranslateMatrix * ScalingMatrix;
 
     return Model;
+}
+
+void Point::UpdateColor(float r, float g, float b)
+{
+    this->R = r;
+    this->G = g;
+    this->B = b;
+
+    const GLfloat g_color_buffer_data[] = {
+        R, G, B,
+    };
+
+    // The following commands will talk about our 'colorbuffer' buffer
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    // Give our vertices to OpenGL.
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+}
+
+void Point::UpdateColor()
+{
+    const GLfloat g_color_buffer_data[] = {
+        R, G, B,
+    };
+
+    // The following commands will talk about our 'colorbuffer' buffer
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    // Give our vertices to OpenGL.
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 }
 
 void Point::Render()

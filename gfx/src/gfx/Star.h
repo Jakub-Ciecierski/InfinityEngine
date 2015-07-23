@@ -48,10 +48,13 @@ public:
     void setStarType(int starType);
 
     void Update(float ax, float ay, float az);
+    void Update(float ax, float ay, float az, float maxVelocity);
 
     Sphere* GetSphere();
     
     Point* GetPoint();
+    
+    float GetVelocityLength();
     
     friend ostream& operator<<(ostream& os, Star& star);
 };

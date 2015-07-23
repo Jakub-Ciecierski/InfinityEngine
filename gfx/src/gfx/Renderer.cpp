@@ -47,7 +47,8 @@ int counter = 0;
 /***** FUNCtIONS *****/
 /*********************/
 
-void bindVBO(GLuint vertexBuffer, GLuint uvbuffer, GLuint elementbuffer, int indiciesSize);
+void bindVBO(GLuint vertexBuffer, GLuint uvbuffer, 
+        GLuint elementbuffer, GLuint colorbuffer, int indiciesSize);
 void unbindVBO();
 
 void render(void);
@@ -58,7 +59,7 @@ void mouseMove(int x, int y);
 void calculateFPS();
 
 void updateGalaxies();
-float4* getGalaxiesDescription(int count);
+float4* getGalaxiesDescription(int count, float* maxVelocity);
 
 void render(void)
 {
@@ -78,8 +79,10 @@ void render(void)
     // Bind VBO etc
     int indiciesSize = i_sphere->indicesSize;
     
+    GLuint colorbuffer = i_sphere->colorbuffer;
+    
     bindVBO(i_sphere->vertexbuffer, i_sphere->uvbuffer, 
-            i_sphere->elementbuffer, i_sphere->indicesSize);
+            i_sphere->elementbuffer, i_sphere->colorbuffer, i_sphere->indicesSize);
     
     // compute this part of MVP only once
     glm::mat4 tmp_MVP = camera->ProjectionMatrix * camera->ViewMatrix;
@@ -95,10 +98,18 @@ void render(void)
         {
             Star* star = stars[j];
             
-            //MVP = tmp_MVP * star->GetSphere()->GetModelMatrix();
             MVP = tmp_MVP * star->GetPoint()->GetModelMatrix();
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+            star->point->UpdateColor();
+            
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, star->point->colorbuffer);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+            
             glDrawElements(GL_POINTS, indiciesSize, GL_UNSIGNED_SHORT, (void*)0 );
+            
+            glDisableVertexAttribArray(1);
         }
 
         stars = galaxies[i]->bulge;
@@ -107,10 +118,17 @@ void render(void)
         {
             Star* star = stars[j];
 
-            //MVP = tmp_MVP * star->GetSphere()->GetModelMatrix();
+            star->point->UpdateColor();
+            
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, star->point->colorbuffer);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
             MVP = tmp_MVP * star->GetPoint()->GetModelMatrix();
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
             glDrawElements(GL_POINTS, indiciesSize, GL_UNSIGNED_SHORT, (void*)0 );
+            
+            glDisableVertexAttribArray(1);
         }
         
         stars = galaxies[i]->halo;
@@ -119,10 +137,17 @@ void render(void)
         {
             Star* star = stars[j];
 
-            //MVP = tmp_MVP * star->GetSphere()->GetModelMatrix();
+            star->point->UpdateColor();
+            
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, star->point->colorbuffer);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+            
             MVP = tmp_MVP * star->GetPoint()->GetModelMatrix();
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
             glDrawElements(GL_POINTS, indiciesSize, GL_UNSIGNED_SHORT, (void*)0 );
+            
+            glDisableVertexAttribArray(1);
         }
     }
 
@@ -137,7 +162,9 @@ void updateGalaxies()
 {
     int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
 
-    float4* bodyDescription = getGalaxiesDescription(count);
+    float maxVelocity = 0;
+    
+    float4* bodyDescription = getGalaxiesDescription(count, &maxVelocity);
     float3* acceleration = (float3*)malloc(sizeof(float3) * count);
 
     galaxyCollisionInit(bodyDescription, acceleration, count);
@@ -154,8 +181,8 @@ void updateGalaxies()
         {
             Star* star = stars[j];
 
-        float3 acc = acceleration[index++];
-        star->Update(acc.x, acc.y, acc.z);
+            float3 acc = acceleration[index++];
+            star->Update(acc.x, acc.y, acc.z, maxVelocity);
         }
 
         stars = galaxies[i]->bulge;
@@ -164,8 +191,8 @@ void updateGalaxies()
         {
             Star* star = stars[j];
 
-        float3 acc = acceleration[index++];
-        star->Update(acc.x, acc.y, acc.z);
+            float3 acc = acceleration[index++];
+            star->Update(acc.x, acc.y, acc.z, maxVelocity);
         }
 
         stars = galaxies[i]->halo;
@@ -174,8 +201,8 @@ void updateGalaxies()
         {
             Star* star = stars[j];
 
-        float3 acc = acceleration[index++];
-        star->Update(acc.x, acc.y, acc.z);
+            float3 acc = acceleration[index++];
+            star->Update(acc.x, acc.y, acc.z, maxVelocity);
         }
     }
 
@@ -183,66 +210,80 @@ void updateGalaxies()
     free(acceleration);
 }
 
-float4* getGalaxiesDescription(int count)
+float4* getGalaxiesDescription(int count, float* maxVelocity)
 {
-	//int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
+    //int count = galaxies[0]->TotalSize() + galaxies[1]->TotalSize();
 
-	//int sizef3 = count * sizeof(float3);
-	int sizef4 = count * sizeof(float4);
+    //int sizef3 = count * sizeof(float3);
+    int sizef4 = count * sizeof(float4);
 
-	//fprintf(stderr, "[Cuda] Bodies Count: %d \n", count);
+    //fprintf(stderr, "[Cuda] Bodies Count: %d \n", count);
 
-	float4* bodyDescription = (float4*)malloc(sizef4);
-	//float3* acceleration = (float3*)malloc(sizef3);
+    float4* bodyDescription = (float4*)malloc(sizef4);
+    //float3* acceleration = (float3*)malloc(sizef3);
 
-	int index = 0;
+    int index = 0;
+    
+    *maxVelocity = galaxies[0]->bulge[0]->GetVelocityLength();
 
-	// Init the body description - position and mass
-	for (int i = 0; i < GALAXY_COUNT; i++)
-	{
-		int size;
-		Star** stars;
+    // Init the body description - position and mass
+    for (int i = 0; i < GALAXY_COUNT; i++)
+    {
+        int size;
+        Star** stars;
 
-		stars = galaxies[i]->disk;
-		size = galaxies[i]->diskSize;
-		for (int j = 0; j < size; j++)
-		{
-                    Star* star = stars[j];
+        stars = galaxies[i]->disk;
+        size = galaxies[i]->diskSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
 
-                    bodyDescription[index].x = star->point->X;
-                    bodyDescription[index].y = star->point->Y;
-                    bodyDescription[index].z = star->point->Z;
-                    bodyDescription[index].w = star->mass;
-                    index++;
-		}
+            bodyDescription[index].x = star->point->X;
+            bodyDescription[index].y = star->point->Y;
+            bodyDescription[index].z = star->point->Z;
+            bodyDescription[index].w = star->mass;
+            index++;
+            
+            if(*maxVelocity < star->GetVelocityLength()){
+                *maxVelocity = star->GetVelocityLength();
+            }
+        }
 
-		stars = galaxies[i]->bulge;
-		size = galaxies[i]->bulgeSize;
-		for (int j = 0; j < size; j++)
-		{
-                    Star* star = stars[j];
+        stars = galaxies[i]->bulge;
+        size = galaxies[i]->bulgeSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
 
-                    bodyDescription[index].x = star->point->X;
-                    bodyDescription[index].y = star->point->Y;
-                    bodyDescription[index].z = star->point->Z;
-                    bodyDescription[index].w = star->mass;
-                    index++;
-		}
+            bodyDescription[index].x = star->point->X;
+            bodyDescription[index].y = star->point->Y;
+            bodyDescription[index].z = star->point->Z;
+            bodyDescription[index].w = star->mass;
+            index++;
+            
+            if(*maxVelocity < star->GetVelocityLength()){
+                *maxVelocity = star->GetVelocityLength();
+            }
+        }
 
-		stars = galaxies[i]->halo;
-		size = galaxies[i]->haloSize;
-		for (int j = 0; j < size; j++)
-		{
-                    Star* star = stars[j];
+        stars = galaxies[i]->halo;
+        size = galaxies[i]->haloSize;
+        for (int j = 0; j < size; j++)
+        {
+            Star* star = stars[j];
 
-                    bodyDescription[index].x = star->point->X;
-                    bodyDescription[index].y = star->point->Y;
-                    bodyDescription[index].z = star->point->Z;
-                    bodyDescription[index].w = star->mass;
-                    index++;
-		}
-	}
-	return bodyDescription;
+            bodyDescription[index].x = star->point->X;
+            bodyDescription[index].y = star->point->Y;
+            bodyDescription[index].z = star->point->Z;
+            bodyDescription[index].w = star->mass;
+            index++;
+            
+            if(*maxVelocity < star->GetVelocityLength()){
+                *maxVelocity = star->GetVelocityLength();
+            }
+        }
+    }
+    return bodyDescription;
 }
 
 ///////////////////////////////// <PARTICLE STUFF> /////////////////////////////////////////
@@ -369,7 +410,8 @@ void createParticles(int particleCount)
 
 ///////////////////////////////// </PARTICLE STUFF> /////////////////////////////////////////
 
-void bindVBO(GLuint vertexbuffer, GLuint uvbuffer, GLuint elementbuffer, int indiciesSize)
+void bindVBO(GLuint vertexbuffer, GLuint uvbuffer, 
+        GLuint elementbuffer, GLuint colorbuffer, int indiciesSize)
 {
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
@@ -388,19 +430,34 @@ void bindVBO(GLuint vertexbuffer, GLuint uvbuffer, GLuint elementbuffer, int ind
         0,                  // stride
         (void*)0            // array buffer offset
 	);
-
-    // 2nd attribute buffer : UVs
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-    glVertexAttribPointer(
-        1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-        2,                                // size : U+V => 2
-        GL_FLOAT,                         // type
-        GL_FALSE,                         // normalized?
-        0,                                // stride
-        (void*)0                          // array buffer offset
-    );
-
+    /*
+    if(colorbuffer != 0){
+        // 2nd attribute buffer : colors
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glVertexAttribPointer(
+            1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+            3,                                // size
+            GL_FLOAT,                         // type
+            GL_FALSE,                         // normalized?
+            0,                                // stride
+            (void*)0                          // array buffer offset
+            );
+    }
+    else {
+        // 2nd attribute buffer : UVs
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+        glVertexAttribPointer(
+            1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+            2,                                // size : U+V => 2
+            GL_FLOAT,                         // type
+            GL_FALSE,                         // normalized?
+            0,                                // stride
+            (void*)0                          // array buffer offset
+        );
+    }
+    */
     // Index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 }
@@ -408,7 +465,7 @@ void bindVBO(GLuint vertexbuffer, GLuint uvbuffer, GLuint elementbuffer, int ind
 void unbindVBO()
 {
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    //glDisableVertexAttribArray(1);
 }
 
 void keyboard(unsigned char c, int x, int y)
@@ -517,7 +574,7 @@ int GFXInit(int argc, char** argv)
     initSampleObjects();
 
     //galaxies = gllParse(argv[1], Texture, TextureID);
-    galaxies = glxParseGalaxies(argv[1]);
+    galaxies = glxParseGalaxies("resources");
 
     createParticles(galaxies[0]->TotalSize() + galaxies[1]->TotalSize());
 
@@ -586,14 +643,15 @@ int initProgram()
     programID = LoadShaders("src/gfx/shaders/ParticleVertexShader.vert",
         		"src/gfx/shaders/ParticleFragmentShader.frag");
     */
-    /*
+    
     programID = LoadShaders("src/gfx/shaders/VertexShader.vert",
     		"src/gfx/shaders/FragmentShader.frag");
 
-    */
+    
+    /*
     programID = LoadShaders("src/gfx/shaders/TextureVertexShader.vert", 
             "src/gfx/shaders/TextureFragmentShader.frag");
-
+*/
     glUseProgram(programID);
     
     // Get a handle for our "MVP" uniform.

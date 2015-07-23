@@ -67,16 +67,72 @@ void Star::Update(float ax, float ay, float az)
     vx += ax * speed;
     vy += ay * speed;
     vz += az * speed;
-/*
-    this->sphere->X += vx * speed;
-    this->sphere->Y += vy * speed;
-    this->sphere->Z += vz * speed;
- */  
-
 
     this->point->X += vx * speed;
     this->point->Y += vy * speed;
     this->point->Z += vz * speed;
+    
+    float r, g, b;
+    
+    if(vx > vy && vx > vz)
+    {
+        r = 1.0f;
+        g = 0.0f;
+        b = 0.0f;
+    }
+    else if(vy > vx && vy > vz)
+    {
+        r = 0.0f;
+        g = 1.0f;
+        b = 0.0f;
+    }
+    else if(vz > vy && vz > vx)
+    {
+        r = 0.0f;
+        g = 0.0f;
+        b = 1.0f;
+    }
+    else
+    {
+        r = 1.0f;
+        g = 1.0f;
+        b = 1.0f;
+    }
+        
+    this->point->UpdateColor(r, g, b);
+}
+
+void Star::Update(float ax, float ay, float az, float maxVelocity)
+{
+    // TODO add deltaTime multiplyer
+
+    vx += ax * speed;
+    vy += ay * speed;
+    vz += az * speed;
+
+    this->point->X += vx * speed;
+    this->point->Y += vy * speed;
+    this->point->Z += vz * speed;
+    
+    float myVelocity = this->GetVelocityLength();
+    
+    float diff = (myVelocity / maxVelocity);
+    //printf("%f\n",diff);
+    
+    if(this->galaxyType == GLX_MW){
+        this->point->R = 1.0f - diff;
+        this->point->G = 1.0f;
+        this->point->B = diff;
+    }
+    else
+    {
+        this->point->R = diff;
+        this->point->G = 1.0f;
+        this->point->B = 1.0f - diff;
+    }
+    //this->point->UpdateColor(diff, diff, diff);
+    //this->point->UpdateColor(, 1.0f, 1.0f);
+   
 }
 
 Sphere* Star::GetSphere()
@@ -88,6 +144,16 @@ Point* Star::GetPoint()
 {
     return this->point;
 }     
+
+float Star::GetVelocityLength()
+{
+    float length = 0;
+    
+    length = (vx*vx + vy*vy + vz*vz);
+    length = sqrt(length);
+    
+    return length;
+}
 
  ostream& operator<< (ostream& os, Star& star)
  {

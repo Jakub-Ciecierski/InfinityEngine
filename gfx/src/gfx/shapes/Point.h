@@ -51,6 +51,9 @@ public:
     Point(float x, float y, float z);
     Point(float x, float y, float z, GLuint texture, GLuint textureID);
 
+    void UpdateColor(float r, float g, float b);
+    void UpdateColor();
+    
     void Render();
     void RenderTexture();
     void RenderTextureIndices();
