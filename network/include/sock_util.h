@@ -3,10 +3,8 @@
  * low level socket programming.
  */
 
-#ifndef _SOCKETS_H_
-#define _SOCKETS_H_
-
-#include "../util/macros.h"
+#ifndef _COMMON_SOCKETS_H_
+#define _COMMON_SOCKETS_H_
 
 #include <stdio.h>
 #include <stdlib.h>

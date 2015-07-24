@@ -1,4 +1,5 @@
-#include "sockets.h"
+#include "sock_util.h"
+#include "macros.h"
 
 /**
  * Creates an endpoint for communication.
@@ -123,12 +124,16 @@ int bind_local_socket(char *name, int type, int backlog){
 int bind_inet_socket(uint16_t port,int type, int backlog){
     struct sockaddr_in addr;
     int socketfd,t=1;
+    
     socketfd = make_socket(PF_INET,type);
+    
     memset(&addr, 0, sizeof(struct sockaddr_in));
+    
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR,&t, sizeof(t))) 
+    
+    if(setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR,&t, sizeof(t))) 
         ERR("setsockopt");
     if(bind(socketfd,(struct sockaddr*) &addr,sizeof(addr)) < 0)  
         ERR("bind");
@@ -140,6 +145,8 @@ int bind_inet_socket(uint16_t port,int type, int backlog){
 /**
  * Makes a socket, makes an address structure and finally connects
  * to given socket.
+ * Uses make_socket() and make_local_address()
+ * 
  * @param name
  *      Name of the socket
  * @return 
@@ -171,6 +178,8 @@ int connect_local_socket(char *name){
 /**
  * Makes a socket, makes an address structure and finally connects
  * to given socket.
+ * Uses make_socket() and make_inet_address()
+ * 
  * @param address
  *      IPv4 Address
  * @param port

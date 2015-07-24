@@ -5,8 +5,8 @@
  * 
  * */
 
-#ifndef _IO_H_
-#define _IO_H_
+#ifndef _COMMON_IO_H_
+#define _COMMON_IO_H_
 
 #include "../util/macros.h"
 

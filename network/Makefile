@@ -1,17 +1,24 @@
-OBJS = src/Main.cpp src/util/GalaxyLoader.cpp src/gfx/Renderer.cpp src/gfx/Camera.cpp src/gfx/Star.cpp src/gfx/util/ShaderLoader.cpp src/gfx/shapes/Cube.cpp src/gfx/shapes/Sphere.cpp src/gfx/shapes/Triangle.cpp src/gfx/shapes/Point.o src/gfx/util/BMPLoader.cpp src/gfx/Galaxy.cpp
+CC = g++
 
-CC = g++ 
+INCLUDE = -I include/
+L_FLAGS = 
+C_FLAGS = -Wall ${INCLUDE}
 
-#CFLAGS  = -g -Wall -std=c++11
-CFLAGS  = -g -Wall
-#LDFLAGS  := $(LDFLAGS) -lGL -lglut -lGLEW
-LDFLAGS  := $(LDFLAGS)
-INCLUDES = include
+OBJ = sock_util.o socket.o addressIP.o io.o
 
-APP_NAME = engine
+BUILD = build/
+SRC = src/
 
-all : $(OBJS) $(INCLUDES)
-	$(CC) $(OBJS) $(CFLAGS) $(LDFLAGS) -o $(APP_NAME)
+all: mkdir -p ${BUILD}
 
-clean: 
-	$(RM) engine *.o *~
+socket.o: ${OBJ}
+	${CC} -o ballz ${OBJ} ${L_FLAGS}
+
+sock_util.o: ${SRC}sock_util.cpp
+	${CC} ${C_FLAGS} -o sock_util.o -c ${SRC}sock_util.cc
+
+sock_util.o: ${SRC}sock_util.cpp
+	${CC} ${C_FLAGS} -o main.o -c ${SRC}main.cc
+	
+
+gcc -shared -o libmylib.so  mylib.o blah.o grr.o  -lm

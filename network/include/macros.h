@@ -2,8 +2,8 @@
  * This header should be included as first in every other header
  * */
 
-#ifndef _MACROS_H_
-#define _MACROS_H_
+#ifndef _UTIL_MACROS_H_
+#define _UTIL_MACROS_H_
 
 #define _GNU_SOURCE
 #include <sys/types.h>
