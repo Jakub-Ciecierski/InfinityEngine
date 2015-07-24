@@ -1,5 +1,7 @@
 CC = g++
 
+LIB_NAME = netfx
+
 INCLUDE = -I include/
 L_FLAGS = 
 C_FLAGS = -Wall ${INCLUDE}
@@ -9,16 +11,22 @@ OBJ = sock_util.o socket.o addressIP.o io.o
 BUILD = build/
 SRC = src/
 
-all: mkdir -p ${BUILD}
+all: ${LIB_NAME}
 
-socket.o: ${OBJ}
-	${CC} -o ballz ${OBJ} ${L_FLAGS}
+${LIB_NAME}: ${OBJ}
+		${CC} ${L_FLAGS} -shared -o ${LIB_NAME}.so ${OBJ}
+		
+socket.o: ${SRC}socket.cpp
+		${CC} -o socket.o -c ${SRC}socket.cpp ${C_FLAGS}
 
-sock_util.o: ${SRC}sock_util.cpp
-	${CC} ${C_FLAGS} -o sock_util.o -c ${SRC}sock_util.cc
+addressIP.o: ${SRC}addressIP.cpp
+		${CC} ${C_FLAGS} -o addressIP.o -c ${SRC}addressIP.cpp
 
-sock_util.o: ${SRC}sock_util.cpp
-	${CC} ${C_FLAGS} -o main.o -c ${SRC}main.cc
+sock_util.o: ${SRC}util/sock_util.cpp
+		${CC} ${C_FLAGS} -o sock_util.o -c ${SRC}util/sock_util.cpp
 	
+io.o: ${SRC}common/io.cpp
+		${CC} ${C_FLAGS} -o io.o -c ${SRC}common/io.cpp
 
-gcc -shared -o libmylib.so  mylib.o blah.o grr.o  -lm
+build:
+		mkdir -p ${BUILD}
