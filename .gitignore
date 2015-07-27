@@ -4,7 +4,7 @@ engine/src/bin/
 */nbproject/
 *.o
 .settings/
-.project
+*/.project
 .cproject
 .gitignore~
 gfx/engine

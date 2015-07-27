@@ -1,6 +1,8 @@
 #include "sock_util.h"
 #include "macros.h"
 
+// TODO Socket errors currently Shutdown the applications
+
 /**
  * Creates an endpoint for communication.
  * After successfully calling this function.
@@ -23,8 +25,10 @@
  * @return 
  *      Socket descriptor on success.
  *      On failure -1 and errno indicating the error.
+ *      CURRENTLY ERR() IS CALLED ON ERROR AND PROGRAM SHUTSDOWN
  */
-int make_socket(int domain, int type){
+int make_socket(int domain, int type)
+{
     int sock;
     sock = socket(domain,type,0);
     if(sock < 0) ERR("socket");
@@ -39,7 +43,8 @@ int make_socket(int domain, int type){
  * @return 
  *      The LOCAL socket address structure.
  */
-struct sockaddr_un make_local_address(char *name){
+struct sockaddr_un make_local_address(char *name)
+{
     struct sockaddr_un addr;
     memset(&addr, 0, sizeof(struct sockaddr_un));
     addr.sun_family = AF_UNIX;
@@ -57,7 +62,8 @@ struct sockaddr_un make_local_address(char *name){
  * @return 
  *      The INET socket address structure.
  */
-struct sockaddr_in make_inet_address(char *address, uint16_t port){
+struct sockaddr_in make_inet_address(char *address, uint16_t port)
+{
     struct sockaddr_in addr;
     struct hostent *hostinfo;
     addr.sin_family = AF_INET;
@@ -80,9 +86,11 @@ struct sockaddr_in make_inet_address(char *address, uint16_t port){
  * @param backlog
  *      Hint to the limit of outstanding connections in the socket's
  *      listen queue.
- * @return 
+ * @return
+ * 		Socket file descriptor
  */
-int bind_local_socket(char *name, int type, int backlog){
+int bind_local_socket(char *name, int type, int backlog)
+{
     struct sockaddr_un addr;
     int socketfd;
     if(unlink(name) <0&&errno!=ENOENT) ERR("unlink");
@@ -117,11 +125,17 @@ int bind_local_socket(char *name, int type, int backlog){
  *      The value has type int; a nonzero value means "yes". 
  * 
  * @param port
+ * 		Port
  * @param type
+ * 		Type of the socket. refer to: man 2 socket
  * @param backlog
+ * 		Hint to the limit of outstanding connections in the socket's
+ *      listen queue.
  * @return 
+ * 		Bound socket file descriptor
  */
-int bind_inet_socket(uint16_t port,int type, int backlog){
+int bind_inet_socket(uint16_t port,int type, int backlog)
+{
     struct sockaddr_in addr;
     int socketfd,t=1;
     
@@ -143,6 +157,61 @@ int bind_inet_socket(uint16_t port,int type, int backlog){
 }
 
 /**
+ * Description:
+ *
+ * Makes a UDP socket, sets a socket option(*) using setsockopt()
+ * and finally binds the address to it.
+ *
+ * Notes:
+ *
+ * 	INADDR_ANY:
+ * 		When sending, a socket bound with INADDR_ANY
+ * 		binds to the default IP address, which is that
+ * 		 of the lowest-numbered interface.
+ *
+ *
+ * (*)  For more info refer to: man setsockopt
+ *      or see the section:
+ *      http://www.gnu.org/software/libc/manual/html_node/Socket-Options.html
+ *
+ *      SOL_SOCKET:
+ *      Use this constant as the level argument to getsockopt or setsockopt to
+ *      manipulate the socket-level options described in this section.
+ *
+ *      SO_REUSEADDR:
+ *      This option controls whether bind should permit reuse of local
+ *      addresses for this socket. If you enable this option,
+ *      you can actually have two sockets with the same Internet port number
+ *
+ *      The value has type int; a nonzero value means "yes".
+ *
+ * @param port
+ * 		Port
+ * @return
+ * 		Bound socket file descriptor
+ */
+int bind_inet_udp_socket(uint16_t port)
+{
+    struct sockaddr_in addr;
+    int socketfd,t=1;
+
+    socketfd = make_socket(PF_INET,SOCK_DGRAM);
+
+    memset(&addr, 0, sizeof(struct sockaddr_in));
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if(setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR,&t, sizeof(t)))
+        ERR("setsockopt");
+    if(bind(socketfd,(struct sockaddr*) &addr,sizeof(addr)) < 0)
+        ERR("bind");
+    return socketfd;
+}
+
+
+/**
  * Makes a socket, makes an address structure and finally connects
  * to given socket.
  * Uses make_socket() and make_local_address()
@@ -152,7 +221,8 @@ int bind_inet_socket(uint16_t port,int type, int backlog){
  * @return 
  *      Socket descriptor
  */
-int connect_local_socket(char *name){
+int connect_local_socket(char *name)
+{
     struct sockaddr_un addr;
     int socketfd;
     socketfd = make_socket(PF_UNIX,SOCK_STREAM);
@@ -187,7 +257,8 @@ int connect_local_socket(char *name){
  * @return 
  *      The socket descriptor
  */
-int connect_inet_socket(char *address, uint16_t port){
+int connect_inet_socket(char *address, uint16_t port)
+{
     struct sockaddr_in addr;
     int socketfd;
     socketfd = make_socket(PF_INET,SOCK_STREAM);
@@ -208,4 +279,12 @@ int connect_inet_socket(char *address, uint16_t port){
         }
     }
     return socketfd;
+}
+
+/**
+ * Returns ip address formated as string with dots
+ */
+char* get_ip_address(struct sockaddr_in addr_in)
+{
+	return inet_ntoa(addr_in.sin_addr);
 }

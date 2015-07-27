@@ -2,10 +2,10 @@
  * This header should be included as first in every other header
  * */
 
-#ifndef _UTIL_MACROS_H_
-#define _UTIL_MACROS_H_
+#ifndef _NETWORK_MACROS_H_
+#define _NETWORK_MACROS_H_
 
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 #include <sys/types.h>
 #include <signal.h>
 #include <stdio.h>

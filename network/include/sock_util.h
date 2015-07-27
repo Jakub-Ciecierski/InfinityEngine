@@ -3,8 +3,8 @@
  * low level socket programming.
  */
 
-#ifndef _COMMON_SOCKETS_H_
-#define _COMMON_SOCKETS_H_
+#ifndef _NETWORK_SOCKETS_H_
+#define _NETWORK_SOCKETS_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +18,8 @@
 #include <netinet/in.h>
 #include <signal.h>
 #include <netdb.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
 
 int make_socket(int domain, int type);
 
@@ -29,8 +31,12 @@ int bind_local_socket(char *name, int type, int backlog);
 
 int bind_inet_socket(uint16_t port,int type, int backlog);
 
+int bind_inet_udp_socket(uint16_t port);
+
 int connect_local_socket(char *name);
 
 int connect_inet_socket(char *name, uint16_t port);
+
+char* get_ip_address(struct sockaddr_in addr_int);
 
 #endif

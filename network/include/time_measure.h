@@ -10,8 +10,8 @@
  *      Author: jakub
  */
 
-#ifndef _UTIL_TIME_H_
-#define _UTIL_TIME_H_
+#ifndef _NETWORK_TIME_MEASURE_H_
+#define _NETWORK_TIME_MEASURE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,4 +60,4 @@ static double second(void)
 #endif
 
 
-#endif /* _UTIL_TIME_H_ */
+#endif /* _NETWORK_UTIL_TIME_H_ */

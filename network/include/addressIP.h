@@ -7,25 +7,40 @@
  * Created on July 24, 2015, 6:05 PM
  */
 
-// TODO (LP) Introduce IPv6
+// TODO (LowP) Introduce IPv6
 
-#ifndef ADDRESS_IP_H
-#define	ADDRESS_IP_H
+#ifndef _NETWORK_ADDRESS_IP_H
+#define	_NETWORK_ADDRESS_IP_H
 
-class AddressIP {
+#include "sock_util.h"
+#include <iostream>
+
+class AddressIP
+{
 public:
-    AddressIP(char* address, unsigned int port);
+    AddressIP(char* address, uint16_t port);
+    AddressIP(sockaddr_in sockAddress);
+
     AddressIP(const AddressIP& orig);
 
     virtual ~AddressIP();
     
-    char* address();
-    int port();
+    char* ipAddress();
+    uint16_t port();
+    struct sockaddr_in sockAddress();
+
+    friend std::ostream& operator<<(std::ostream& os,
+    								AddressIP& addressIP);
 private:
 
-    char* address_;
-    unsigned int port_;
+    // IPv4 Address
+    char* ipAddress_;
+    // Port
+    uint16_t port_;
+
+    // The socket address structure
+    struct sockaddr_in sockAddress_;
 };
 
-#endif	/* ADDRESS_IP_H */
+#endif	/* _NETWORK_ADDRESS_IP_H */
 

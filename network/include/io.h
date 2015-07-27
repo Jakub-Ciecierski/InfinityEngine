@@ -5,10 +5,10 @@
  * 
  * */
 
-#ifndef _COMMON_IO_H_
-#define _COMMON_IO_H_
+#ifndef _NETWORK_IO_H_
+#define _NETWORK_IO_H_
 
-#include "../util/macros.h"
+#include "macros.h"
 
 #include <sys/types.h>
 #include <unistd.h>
