@@ -11,7 +11,7 @@ LIB_FLAGS = -cvq
 L_FLAGS = ${LIBS}
 C_FLAGS = -Wall ${INCLUDES}
 
-INCLUDES = 	-I ${INC}
+INCLUDES = 	-I ${INC} -I ../stdifx/include/
 LIBS = -L ${LIB}
 
 INC = include/
@@ -20,14 +20,13 @@ BLD = build/
 SRC = src/
 
 OBJ = 	${BLD}sock_util.o ${BLD}socket.o \
-		${BLD}addressIP.o ${BLD}smart_console.o \
-		${BLD}io.o ${BLD}time_measure.o
+		${BLD}addressIP.o ${BLD}io.o
 
 ######################################################################
 
 # clean_lib -> if lib is now cleaned, then the
 # changes are merged, creating multiple definition errors
-all: info make_project clean_lib ${LIB_NAME}
+all: info_prefix make_project clean_lib ${LIB_NAME} info_suffix
 
 ${LIB_NAME}: ${OBJ}
 		${LIB_CC} ${LIB_FLAGS} ${LIB}${LIB_NAME}${LIB_EXT} ${OBJ}
@@ -57,17 +56,26 @@ ${BLD}io.o: ${SRC}common/io.cpp
 .PHONY: all
 
 make_project:
-	mkdir -p  ${INC} ${LIB} ${BLD} ${SRC}
-
-info:
-	@echo 
-	@echo "***********************************" 
-	@echo "****** COMPILING:" ${LIB_NAME} "*******"
-	@echo "***********************************"
-	@echo  
+	mkdir -p ${INC} ${LIB} ${BLD} ${SRC}
 
 clean_lib:
 	${RM} ${LIB}*.a
 	
 clean: 
 	$(RM) ${BLD}*.o *.o ${LIB}*.a
+
+######################################################################
+	
+info_prefix:
+	@echo
+	@echo
+	@echo "--------------------------------------------------------------------------------"
+	@echo 
+	@echo "\t\t\t\tCOMPILING:" ${LIB_NAME}
+	@echo 
+	@echo
+
+info_suffix:
+	@echo
+	@echo "--------------------------------------------------------------------------------"
+	@echo

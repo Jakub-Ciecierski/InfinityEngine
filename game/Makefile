@@ -1,51 +1,64 @@
 # TODO src subdirectories
-# TODO build / release paths
 
 ######################################################################
 
 CC = g++
 
-SUBDIRS = ../netifx/
+# The libraries to be compiled before linking to the application
+SUBDIRS = ../stdifx/ ../netifx/
 
 # static libs flags have to be at the end of compile string
-L_FLAGS = -static ${LIB}
-C_FLAGS = -Wall ${INCLUDE} -fPIC
+L_FLAGS = -static ${LIBS}
+C_FLAGS = -Wall ${INCLUDES} -fPIC
 
-LIB = -L lib/ -L ../netifx/lib -lnetifx
-INCLUDE = -I include/ -I ../netifx/include/
-BUILD = build/
+LIBS = -L ${LIB} -L ../netifx/lib -lnetifx -L ../stdifx/lib -lstdifx
+INCLUDES = -I ${INC} -I ../netifx/include/ -I ../stdifx/include/
+
+INC = include/
+LIB = lib/
+BLD = build/
 SRC = src/
+BIN = bin/
 
 OBJ =
 
 ######################################################################
 
-all: make_dir network info server client
-
-network:
-	$(MAKE) -C ${SUBDIRS}
+all:  $(SUBDIRS) info_prefix make_project ${BIN}server ${BIN}client info_suffix
+	
+$(SUBDIRS):
+	$(MAKE) -C $@
 
 ######################################################################		
 
-server: ${SRC}server.cpp
-	${CC} ${C_FLAGS} ${SRC}server.cpp -o server ${L_FLAGS}
+${BIN}server: ${SRC}server.cpp
+	${CC} ${C_FLAGS} ${SRC}server.cpp -o ${BIN}server ${L_FLAGS}
 
-client: ${SRC}client.cpp
-	${CC} ${C_FLAGS} ${SRC}client.cpp -o client ${L_FLAGS} 
+${BIN}client: ${SRC}client.cpp
+	${CC} ${C_FLAGS} ${SRC}client.cpp -o ${BIN}client ${L_FLAGS} 
 
 ######################################################################
 
-make_dir:
-	mkdir -p ${BUILD}
-
-info:
-	@echo 
-	@echo "****************************************" 
-	@echo "******* COMPILING: Server/Client"  "*******"
-	@echo "****************************************"
-	@echo 
+make_project:
+	mkdir -p ${BLD} ${BIN} ${SRC} ${LIB} ${INC}
 
 clean: 
-	$(RM) *.o *~ server client
+	$(RM) *.o *~ ${BIN}*
 	
-.PHONY: all
+.PHONY: all $(SUBDIRS)
+
+######################################################################
+
+info_prefix:
+	@echo
+	@echo
+	@echo "--------------------------------------------------------------------------------"
+	@echo 
+	@echo "\t\t\t\tCOMPILING:" game
+	@echo 
+	@echo
+
+info_suffix:
+	@echo
+	@echo "--------------------------------------------------------------------------------"
+	@echo

@@ -10,10 +10,13 @@
 
 #include "addressIP.h"
 #include "io.h"
-#include "macros.h"
-#include "smart_console.h"
 #include "sock_util.h"
 #include "socket.h"
-#include "time_measure.h"
+
+//#include "macros.h"
+//#include "smart_console.h"
+//#include "time_measure.h"
+
+#include "stdifx.h"
 
 #endif /* _NETWORK_NETFX_H_ */

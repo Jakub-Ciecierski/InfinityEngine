@@ -1,5 +1,7 @@
 #include "sock_util.h"
-#include "macros.h"
+
+//#include "macros.h"
+#include "stdifx.h"
 
 // TODO Socket errors currently Shutdown the applications
 

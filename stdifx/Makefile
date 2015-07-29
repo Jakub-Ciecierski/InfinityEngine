@@ -25,7 +25,7 @@ OBJ = ${BLD}smart_console.o ${BLD}time_measure.o
 
 # clean_lib -> if lib is now cleaned, then the
 # changes are merged, creating multiple definition errors
-all: info make_project clean_lib ${LIB_NAME}
+all: info_prefix make_project clean_lib ${LIB_NAME} info_suffix
 
 ${LIB_NAME}: ${OBJ}
 		${LIB_CC} ${LIB_FLAGS} ${LIB}${LIB_NAME}${LIB_EXT} ${OBJ}
@@ -45,15 +45,24 @@ ${BLD}time_measure.o: ${SRC}time_measure.cpp
 make_project:
 	mkdir -p  ${INC} ${LIB} ${BLD} ${SRC}
 
-info:
-	@echo 
-	@echo "***********************************" 
-	@echo "****** COMPILING:" ${LIB_NAME} "*******"
-	@echo "***********************************"
-	@echo  
-
 clean_lib:
 	${RM} ${LIB}*.a
 	
 clean: 
 	$(RM) ${BLD}*.o *.o ${LIB}*.a
+	
+######################################################################
+
+info_prefix:
+	@echo
+	@echo
+	@echo "--------------------------------------------------------------------------------"
+	@echo 
+	@echo "\t\t\t\tCOMPILING:" ${LIB_NAME}
+	@echo 
+	@echo
+
+info_suffix:
+	@echo
+	@echo "--------------------------------------------------------------------------------"
+	@echo

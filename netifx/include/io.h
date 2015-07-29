@@ -8,7 +8,8 @@
 #ifndef _NETWORK_IO_H_
 #define _NETWORK_IO_H_
 
-#include "macros.h"
+//#include "macros.h"
+#include "stdifx.h"
 
 #include <sys/types.h>
 #include <unistd.h>

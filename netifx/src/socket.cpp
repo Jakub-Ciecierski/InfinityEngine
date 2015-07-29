@@ -9,9 +9,11 @@
 #include "socket.h"
 
 /// INCLUDE
-#include "smart_console.h"
-#include "macros.h"
 #include "sock_util.h"
+
+//#include "smart_console.h"
+//#include "macros.h"
+#include "stdifx.h"
 
 /*********************************/
 /******** CONSTRUCTORS ***********/
