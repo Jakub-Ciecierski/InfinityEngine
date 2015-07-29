@@ -1,5 +1,5 @@
 /**
- * This header should be included as first in every other header
+ *
  * */
 
 #ifndef _STDIFX_MACROS_H_
