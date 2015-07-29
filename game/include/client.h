@@ -24,7 +24,7 @@ bool isRunning;
 /**
  * UDP Socket of our client
  */
-Socket* updSocket;
+Socket* udpSocket;
 
 /**
  * Address of the server

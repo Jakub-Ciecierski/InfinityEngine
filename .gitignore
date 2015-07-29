@@ -8,3 +8,7 @@ engine/src/bin/
 .cproject
 .gitignore~
 gfx/engine
+game/client
+game/server
+*/build
+*/lib

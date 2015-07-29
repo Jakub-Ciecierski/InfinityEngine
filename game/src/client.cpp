@@ -7,6 +7,7 @@ void usage(char * name){
 }
 
 int main(int argc, char** argv) {
+
 	uint16_t serverPort;
 	uint16_t clientPort;
 
@@ -25,6 +26,8 @@ int main(int argc, char** argv) {
 
 	initConnection(argv[1], serverPort, clientPort);
 
+	isRunning = true;
+
 	clientWork();
 
 	cleanUp();
@@ -41,16 +44,19 @@ void communicate()
 	char bufferRecv[CMP_BUFFER_SIZE];
 	char bufferSend[CMP_BUFFER_SIZE];
 	int count;
+	AddressIP* addressFrom = NULL;
 
-	if(snprintf(bufferSend, CMP_BUFFER_SIZE, "Hello From Server!") < 0)
+	if(snprintf(bufferSend, CMP_BUFFER_SIZE, "Hello From Client!") < 0)
 		ERR("snprintf");
-	count = updSocket->SendTo(bufferSend , CMP_BUFFER_SIZE, serverAddress);
 
+	count = udpSocket->SendTo(bufferSend , CMP_BUFFER_SIZE, serverAddress);
 
-	count = updSocket->ReceiveFrom(bufferRecv, CMP_BUFFER_SIZE, serverAddress);
+	std::cout << "Sent: " << count << " bytes\n" << std::endl;
+
+	count = udpSocket->ReceiveFrom(bufferRecv, CMP_BUFFER_SIZE, &addressFrom);
 
 	std::cout << "Recevied: " << count << " bytes from:\n"
-			<< serverAddress
+			<< *addressFrom
 			<< "Message:\n"
 			<< bufferRecv
 			<< std::endl;
@@ -72,7 +78,7 @@ void clientWork()
 
 void cleanUp()
 {
-	updSocket->Close();
+	udpSocket->Close();
 }
 
 /**********************************/
@@ -83,7 +89,7 @@ void initSignalHandlers()
 {
 	SmartPrint("initSignalHandlers");
 
-	//if(sethandler(SIG_IGN, SIGPIPE)<0) ERR("sethandler");
+	if(sethandler(SIG_IGN, SIGPIPE)<0) ERR("sethandler");
 }
 
 void initConnection(char* serverIPAddress,
@@ -91,7 +97,8 @@ void initConnection(char* serverIPAddress,
 {
 	SmartPrint("initConnection");
 
-	updSocket = new Socket(clientPort);
+	udpSocket = new Socket(clientPort);
 	serverAddress = new AddressIP(serverIPAddress, serverPort);
 
+	udpSocket->Open();
 }

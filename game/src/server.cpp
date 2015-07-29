@@ -1,7 +1,6 @@
 #include "server.h"
 #include "msg_protocol.h"
 
-
 void usage(char * name)
 {
 	fprintf(stderr,"USAGE: %s port \n",name);
@@ -36,12 +35,12 @@ void communicate()
 	char bufferRecv[CMP_BUFFER_SIZE];
 	char bufferSend[CMP_BUFFER_SIZE];
 	int count;
-	AddressIP* addressFrom;
+	AddressIP* addressFrom = NULL;
 
-	count = updSocket->ReceiveFrom(bufferRecv, CMP_BUFFER_SIZE, addressFrom);
+	count = udpSocket->ReceiveFrom(bufferRecv, CMP_BUFFER_SIZE, &addressFrom);
 
 	std::cout << "Recevied: " << count << " bytes from:\n"
-			<< addressFrom
+			<< *addressFrom
 			<< "Message:\n"
 			<< bufferRecv
 			<< std::endl;
@@ -49,7 +48,7 @@ void communicate()
 	if(snprintf(bufferSend, CMP_BUFFER_SIZE, "Hello From Server!") < 0)
 		ERR("snprintf");
 
-	count = updSocket->SendTo(bufferSend , CMP_BUFFER_SIZE, addressFrom);
+	count = udpSocket->SendTo(bufferSend , CMP_BUFFER_SIZE, addressFrom);
 
 	std::cout << "Response sent" << std::endl;
 }
@@ -63,7 +62,7 @@ void serverWork()
 
 	FD_ZERO(&base_rfds);
 
-	FD_SET(updSocket->fd(), &base_rfds);
+	FD_SET(udpSocket->fd(), &base_rfds);
 
 	sigemptyset (&mask);
 	sigaddset (&mask, SIGINT);
@@ -73,9 +72,9 @@ void serverWork()
 	{
 		rfds=base_rfds;
 		SmartPrint("Starting pselect", 3);
-		if(pselect(updSocket->fd()+1,&rfds,NULL,NULL,NULL,&oldmask)>0)
+		if(pselect(udpSocket->fd()+1,&rfds,NULL,NULL,NULL,&oldmask)>0)
 		{
-			if(FD_ISSET(updSocket->fd(),&rfds))
+			if(FD_ISSET(udpSocket->fd(),&rfds))
 			{
 				SmartPrint("Received message", 3);
 				communicate();
@@ -100,7 +99,7 @@ void cleanUp()
 {
 	SmartPrint("cleanUp()");
 
-	updSocket->Close();
+	udpSocket->Close();
 
 	// Wait for all children.
 	//while (TEMP_FAILURE_RETRY(wait(NULL)) > 0);
@@ -113,13 +112,15 @@ void cleanUp()
 void initSocket(uint16_t port)
 {
 	SmartPrint("TODO [Windows] Init Socket Libraries");
-	updSocket = new Socket(port);
+	udpSocket = new Socket(port);
+
+	udpSocket->Open();
 }
 
 void initSignalHandlers()
 {
 	SmartPrint("Initating Signal Handlers");
-	//if(sethandler(SIG_IGN, SIGPIPE)<0) ERR("sethandler");
+	if(sethandler(SIG_IGN, SIGPIPE)<0) ERR("sethandler");
 }
 
 /**

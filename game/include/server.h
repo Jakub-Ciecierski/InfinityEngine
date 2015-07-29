@@ -24,7 +24,7 @@ bool isRunning;
 /**
 * The UDP server Socket
 */
-Socket* updSocket;
+Socket* udpSocket;
 
 /**********************************/
 /************ METHODS *************/
