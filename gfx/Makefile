@@ -1,123 +1,250 @@
-# TODO src subdirectories
-
+######################################################################
+#--------------------------------------------------------------------#
+#---------------------------- COMMENTS ------------------------------#
+#--------------------------------------------------------------------#
+######################################################################
+#
+# This Makefile is split into:
+# 1) Variables Section
+# 	1.1) Dynamic subsection
+# 	1.2) Static subsection - DO NOT MODIFY
+# 2) Rules Section
+# 	2.1) Static subsection - DO NOT MODIFY
+# 	2.2) Dynamic subsection
+# 3) Dependency Graph - DO NOT MODIFY
+#
+#
+# As a user of this makefile You should not be modifing
+# any of the static subsections.
+#
+#---------------------------------------------------------------------
+#
+# Compilers supported:
+#
+# 1) g++
+# 2) nvcc
+#
+#---------------------------------------------------------------------
+#
+# Supports a particular project structure:
+# Refer to Project Structure section to define the following folders:
+#
+# 1) INC: Header files of this application
+# 2) LIB: Your, local Libraries to be linked with application
+# 3) BLD: Build where your compiled object files are stored
+# 4) SRC: Source files of this application
+# 5) BIN: Binary files, executables of the application
+#
+#---------------------------------------------------------------------
+#
+# Tips:
+#
+# Use '\' to break new line
+# Take special care of whitespaces, it might cause errors.
+# $@ is the value of target
+# $^ is the list of all prerequisites of the rule 
+# $< is just the first prerequisite
+#
+#---------------------------------------------------------------------
+#
+# TODO:
+# (Lack of these features might cause bugs)
+# 
+# Realese / Debug
+# Support for gcc for .c files
+# Currently only one extension per XX_EXT variable applies 
+# Support for unit tests
+# Variable printouts
+#
+#---------------------------------------------------------------------
+#
+# For further information refer to:
+# http://www.gnu.org/software/make/manual/make.html
+#
+######################################################################
+#--------------------------------1-----------------------------------#
+#------------------------ VARIABLES SECTION -------------------------#
+#--------------------------------------------------------------------#
 ######################################################################
 
-CC = g++
-NVCC = nvcc -arch=sm_20
+######################################################################
+#------------------ DYNAMIC SUBSECTION - CAN MODIFY -----------------#
+######################################################################
 
-# The libraries to be compiled before linking to the application
-SUBDIRS =
 
-L_FLAGS = ${LIBS}
-C_FLAGS = -g -Wall -std=c++11 ${INCLUDES}
+#----------------- PRINT OUTS -----------------#
+
+# The separator will be printed between compiling objects
+INFO_SEPARATOR = "--------------------------------------------------------------------------------"
+INFO_FILLER = "\t\t\t\t"
+
+#--------------- APPLICATION NAME -------------#
 
 APP_NAME = galaxy
 
-LIBS = 	-L ${LIB} -L /opt/cuda/lib64 -L /usr/local/cuda/lib64 \
+#--------------- FILE EXTENSIONS --------------#
+
+# c++ extension
+CPP_EXT = .cpp
+# cuda extension
+CUDA_EXT = .cu
+
+#-------------- PROJECT STRUCTURE -------------#
+
+# Your header files
+INC = include
+# Your local libraries to be linked with the application
+LIB = lib
+# Build dumper. All your object files (*.o) will be located here
+OBJ = build
+# Source files and only source files, subdirectories are supported.
+SRC = src
+# Executables of your Application
+BIN = bin
+
+#------------- EXTERNAL MAKEFILES -------------#
+
+# Paths to the Makefiles to be ran before this Makefile.
+# Default target will be executed. (TODO verify this)
+# Can be used to compile your static libraries before linking
+MAKE_EXTERNAL =
+
+#---------------- LIBRARIES -------------------#
+
+# Paths and names of libraries to link with
+LIBS += -L /opt/cuda/lib64 \
+		-L /usr/local/cuda/lib64 \
 		-lGL -lglut -lGLEW -lcudart -lcuda
 
-INCLUDES = 	-I ${INC} -I /usr/local/cuda/include \
+#----------------- INCLUDES -------------------#
+
+# Paths to all Includes
+INCLUDES += -I /usr/local/cuda/include \
     		-I /opt/cuda/include
 
-INC = include/
-LIB = lib/
-BLD = build/
-SRC = src/
-BIN = bin/
+#------------------- FLAGS --------------------#
 
-OBJ = 	${BLD}Main.o ${BLD}GalaxyLoader.o ${BLD}Renderer.o ${BLD}Camera.o 	\
-		${BLD}Star.o ${BLD}ShaderLoader.o ${BLD}Cube.o ${BLD}Sphere.o 		\
-		${BLD}Triangle.o ${BLD}Point.o ${BLD}BMPLoader.o ${BLD}Galaxy.o 	\
-		${BLD}ParticlesCreator.o ${BLD}GalaxyCollision.o
+# Use '-static' for static libraries
+# Use '-shared' for shared libraries
+L_FLAGS +=
+C_FLAGS += -g -Wall -std=c++11
+NVCC_FLAGS += -arch=sm_20
 
 ######################################################################
-
-all: $(SUBDIRS) info_prefix make_project ${APP_NAME} info_suffix
-
-$(SUBDIRS):
-	$(MAKE) -C $@
-
-${APP_NAME}: ${OBJ}
-	$(CC) $(OBJ) -o ${BIN}$(APP_NAME) $(L_FLAGS)
-
-######################################################################		
-
-#----------------- . --------------------#
-
-${BLD}Main.o: ${SRC}Main.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Main.o -c ${SRC}Main.cpp
-
-${BLD}GalaxyLoader.o: ${SRC}util/GalaxyLoader.cpp
-	${CC} ${C_FLAGS} -o ${BLD}GalaxyLoader.o -c ${SRC}util/GalaxyLoader.cpp
-
-#----------------- gfx --------------------#
-
-${BLD}Galaxy.o: ${SRC}gfx/Galaxy.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Galaxy.o -c ${SRC}gfx/Galaxy.cpp
-	
-${BLD}ParticlesCreator.o: ${SRC}gfx/ParticlesCreator.cpp
-	${CC} ${C_FLAGS} -o ${BLD}ParticlesCreator.o -c ${SRC}gfx/ParticlesCreator.cpp
-
-${BLD}Renderer.o: ${SRC}gfx/Renderer.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Renderer.o -c ${SRC}gfx/Renderer.cpp
-
-${BLD}Camera.o: ${SRC}gfx/Camera.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Camera.o -c ${SRC}gfx/Camera.cpp
-
-${BLD}Star.o: ${SRC}gfx/Star.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Star.o -c ${SRC}gfx/Star.cpp
-
-#----------------- gfx/util --------------------#
-
-${BLD}ShaderLoader.o: ${SRC}gfx/util/ShaderLoader.cpp
-	${CC} ${C_FLAGS} -o ${BLD}ShaderLoader.o -c ${SRC}gfx/util/ShaderLoader.cpp
-
-${BLD}BMPLoader.o: ${SRC}gfx/util/BMPLoader.cpp
-	${CC} ${C_FLAGS} -o ${BLD}BMPLoader.o -c ${SRC}gfx/util/BMPLoader.cpp
-
-
-#----------------- gfx/shapes --------------------#
-
-${BLD}Cube.o: ${SRC}gfx/shapes/Cube.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Cube.o -c ${SRC}gfx/shapes/Cube.cpp
-
-${BLD}Sphere.o: ${SRC}gfx/shapes/Sphere.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Sphere.o -c ${SRC}gfx/shapes/Sphere.cpp
-	
-${BLD}Triangle.o: ${SRC}gfx/shapes/Triangle.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Triangle.o -c ${SRC}gfx/shapes/Triangle.cpp
-	
-${BLD}Point.o: ${SRC}gfx/shapes/Point.cpp
-	${CC} ${C_FLAGS} -o ${BLD}Point.o -c ${SRC}gfx/shapes/Point.cpp
-
-
-#----------------- cuda --------------------#
-
-${BLD}GalaxyCollision.o: ${SRC}/cuda/GalaxyCollision.cu ${SRC}/cuda/GalaxyCollision.cuh
-	$(NVCC) -c ${SRC}/cuda/GalaxyCollision.cu -o ${BLD}GalaxyCollision.o 
-
+#------------------ STATIC SUBSECTION - DO NOT MODIFY ---------------#
 ######################################################################
 
-make_project:
-	mkdir -p ${BLD} ${BIN} ${SRC} ${LIB} ${INC}
+LIBS += -L ${LIB}
+INCLUDES += -I ${INC}
+
+CC = g++
+NVCC = nvcc 
+
+L_FLAGS += ${LIBS}
+C_FLAGS += ${INCLUDES} -MMD
+NVCC_FLAGS +=
+
+# All source files
+CPP_SOURCES = $(shell find ${SRC} -name *${CPP_EXT})
+CUDA_SOURCES = $(shell find ${SRC} -name *${CUDA_EXT})
+
+# List of all subdirectories in source directory 
+MODULES = $(shell find ${SRC} -type d)
+
+# All objects to be compiled
+OBJECTS += $(addprefix ${OBJ}/,$(notdir $(CPP_SOURCES:${CPP_EXT}=.o)))
+OBJECTS += $(addprefix ${OBJ}/,$(notdir $(CUDA_SOURCES:${CUDA_EXT}=.o)))
+
+# Add modules to vpath
+VPATH = ${MODULES}
+
+######################################################################
+#---------------------------------2----------------------------------#
+#------------------------------ RULES -------------------------------#
+#--------------------------------------------------------------------#
+######################################################################
+
+######################################################################
+#------------------ STATIC SUBSECTION - DO NOT MODIFY ---------------#
+######################################################################
+
+#------------------ DEFAULT -------------------#
+
+# Release rule
+release: $(MAKE_EXTERNAL) info_prefix init_project ${APP_NAME} info_suffix
+
+#------------------ LINKER --------------------#
+
+${APP_NAME}: ${OBJECTS}
+	@$(CC) -o ${BIN}/${APP_NAME} $^ $(L_FLAGS)
+
+#----------------- COMPILERS ------------------#
+
+# cpp compiler
+$(OBJ)/%.o: %${CPP_EXT}
+	@echo ${INFO_SEPARATOR}
+	@echo 'COMPILING: ' $<
+	@echo
+	@$(CC) $(C_FLAGS) -c -o $@ $<
+
+# cuda compiler
+${OBJ}/%.o: %${CUDA_EXT}
+	@echo ${INFO_SEPARATOR}
+	@echo 'COMPILING: ' $<
+	@echo
+	@$(NVCC) $(NVCC_FLAGS) -c -o $@ $<
+
+#------------------ EXTERNALS -----------------#
+
+# Make external makefiles
+$(MAKE_EXTERNAL):
+	@$(MAKE) -C $@
+
+#---------------- UTILITY RULES ---------------#
+
+# Creates all the directories of the project
+init_project:
+	@mkdir -p ${OBJ} ${BIN} ${SRC} ${LIB} ${INC}
 
 clean: 
-	$(RM) *.o *~ ${BLD}*.o ${BLD}*~ ${BIN}*
-	
-.PHONY: all $(SUBDIRS) ${APP_NAME} ${BLD}*
+	@$(RM) *.o *~ ${OBJ}/*.o ${OBJ}/*.d ${OBJ}/*~ ${BIN}/*
+
+.PHONY: $(SUBDIRS) clean
 
 ######################################################################
+#------------------ DYNAMIC SUBSECTION - CAN MODIFY -----------------#
+######################################################################
+
+#----------------- PRINT RULES ----------------#
 
 info_prefix:
 	@echo
 	@echo
-	@echo "--------------------------------------------------------------------------------"
+	@echo ${INFO_SEPARATOR}
+	@echo ${INFO_SEPARATOR}
 	@echo 
-	@echo "\t\t\t\tCOMPILING:" ${APP_NAME}
+	@echo ${INFO_FILLER}"MAKING:" ${APP_NAME}
 	@echo 
 	@echo
 
 info_suffix:
 	@echo
-	@echo "--------------------------------------------------------------------------------"
+	@echo ${INFO_SEPARATOR}
 	@echo
+	@echo ${INFO_FILLER}"LINKING SUCCESSFULL"
+	@echo
+	@echo ${INFO_SEPARATOR}
+	@echo ${INFO_SEPARATOR}
+	@echo
+
+######################################################################
+#---------------------------------3----------------------------------#
+#---------------- DEPENDENCY GRAPH - DO NOT MODIFY ------------------#
+#--------------------------------------------------------------------#
+######################################################################
+
+#--------------- DEPENDENCY GRAPH -------------#
+	
+# Automatic dependency graph generation
+# Must be inserted at the end of the makefile (TODO verify)
+-include $(OBJECTS:.o=.d)
