@@ -1,81 +1,247 @@
-# TODO src subdirectories
+######################################################################
+#--------------------------------------------------------------------#
+#---------------------------- COMMENTS ------------------------------#
+#--------------------------------------------------------------------#
+######################################################################
+#
+#	Static library makefile template
+#
+#---------------------------------------------------------------------
+#
+# This Makefile is split into:
+# 1) Variables Section
+# 	1.1) Dynamic subsection
+# 	1.2) Static subsection - DO NOT MODIFY
+# 2) Rules Section
+# 	2.1) Static subsection - DO NOT MODIFY
+# 	2.2) Dynamic subsection
+# 3) Dependency Graph - DO NOT MODIFY
+#
+#
+# As a user of this makefile You should not be modifing
+# any of the static subsections.
+#
+#---------------------------------------------------------------------
+#
+# Compilers supported:
+#
+# 1) g++
+# 2) nvcc
+#
+#---------------------------------------------------------------------
+#
+# Supports a particular project structure:
+# Refer to Project Structure section to define the following folders:
+#
+# 1) INC: Header files of this application
+# 2) LIB: Your, local Libraries to be linked with application
+# 3) BLD: Build where your compiled object files are stored
+# 4) SRC: Source files of this application
+#
+#---------------------------------------------------------------------
+#
+# Tips:
+#
+# Use '\' to break new line
+# Take special care of whitespaces, it might cause errors.
+# $@ is the value of target
+# $^ is the list of all prerequisites of the rule
+# $< is just the first prerequisite
+#
+#---------------------------------------------------------------------
+#
+# TODO:
+# (Lack of these features might cause bugs)
+#
+# Realese / Debug
+# Support for gcc for .c files
+# Currently only one extension per XX_EXT variable applies
+# Support for unit tests
+# Variable printouts
+# Add usage
+#
+#---------------------------------------------------------------------
+#
+# For further information refer to:
+# http://www.gnu.org/software/make/manual/make.html
+#
+######################################################################
+#--------------------------------1-----------------------------------#
+#------------------------ VARIABLES SECTION -------------------------#
+#--------------------------------------------------------------------#
 ######################################################################
 
-CC = g++
-LIB_CC = ar
+######################################################################
+#------------------ DYNAMIC SUBSECTION - CAN MODIFY -----------------#
+######################################################################
+
+
+#----------------- PRINT OUTS -----------------#
+
+# The separator will be printed between compiling objects
+INFO_SEPARATOR = "--------------------------------------------------------------------------------"
+INFO_FILLER = "\t\t\t\t"
+
+#--------------- LIBRARY NAME -------------#
 
 LIB_NAME = libnetifx
 LIB_EXT = .a
 
+#--------------- FILE EXTENSIONS --------------#
+
+# c++ extension
+CPP_EXT = .cpp
+# cuda extension
+CUDA_EXT = .cu
+
+#-------------- PROJECT STRUCTURE -------------#
+
+# Your header files
+INC = include
+# Your local libraries to be linked with the application
+LIB = lib
+# Build dumper. All your object files (*.o) will be located here
+OBJ = build
+# Source files and only source files, subdirectories are supported.
+SRC = src
+
+#------------- EXTERNAL MAKEFILES -------------#
+
+# Paths to the Makefiles to be ran before this Makefile.
+# Default target will be executed. (TODO verify this)
+# Can be used to compile your static libraries before linking
+MAKE_EXTERNAL =
+
+#----------------- INCLUDES -------------------#
+
+# Paths to all Includes
+INCLUDES += -I /usr/local/cuda/include \
+    		-I /opt/cuda/include \
+				-I ${INC} -I ../stdifx/include
+
+#------------------- FLAGS --------------------#
+
+C_FLAGS += -g -Wall -std=c++11
+NVCC_FLAGS += -arch=sm_20
+
+######################################################################
+#------------------ STATIC SUBSECTION - DO NOT MODIFY ---------------#
+######################################################################
+
+INCLUDES += -I ${INC}
+
+LIB_CC = ar
+CC = g++
+NVCC = nvcc
+
 LIB_FLAGS = -cvq
-L_FLAGS = ${LIBS}
-C_FLAGS = -Wall ${INCLUDES}
+C_FLAGS += ${INCLUDES} -MMD
+NVCC_FLAGS +=
 
-INCLUDES = 	-I ${INC} -I ../stdifx/include/
-LIBS = -L ${LIB}
+# All source files
+CPP_SOURCES = $(shell find ${SRC} -name *${CPP_EXT})
+CUDA_SOURCES = $(shell find ${SRC} -name *${CUDA_EXT})
 
-INC = include/
-LIB = lib/
-BLD = build/
-SRC = src/
+# List of all subdirectories in source directory
+MODULES = $(shell find ${SRC} -type d)
 
-OBJ = 	${BLD}sock_util.o ${BLD}socket.o \
-		${BLD}addressIP.o ${BLD}io.o
+# All objects to be compiled
+OBJECTS += $(addprefix ${OBJ}/,$(notdir $(CPP_SOURCES:${CPP_EXT}=.o)))
+OBJECTS += $(addprefix ${OBJ}/,$(notdir $(CUDA_SOURCES:${CUDA_EXT}=.o)))
+
+# Add modules to vpath
+VPATH = ${MODULES}
 
 ######################################################################
-
-# clean_lib -> if lib is now cleaned, then the
-# changes are merged, creating multiple definition errors
-all: info_prefix make_project clean_lib ${LIB_NAME} info_suffix
-
-${LIB_NAME}: ${OBJ}
-		${LIB_CC} ${LIB_FLAGS} ${LIB}${LIB_NAME}${LIB_EXT} ${OBJ}
-		
+#---------------------------------2----------------------------------#
+#------------------------------ RULES -------------------------------#
+#--------------------------------------------------------------------#
 ######################################################################
 
-${BLD}socket.o: ${SRC}socket.cpp
-	${CC} ${C_FLAGS} -o ${BLD}socket.o -c ${SRC}socket.cpp 
-
-${BLD}addressIP.o: ${SRC}addressIP.cpp
-	${CC} ${C_FLAGS} -o ${BLD}addressIP.o -c ${SRC}addressIP.cpp
-
-${BLD}sock_util.o: ${SRC}util/sock_util.cpp
-	${CC} ${C_FLAGS} -o ${BLD}sock_util.o -c ${SRC}util/sock_util.cpp
-
-${BLD}smart_console.o: ${SRC}util/smart_console.cpp
-	${CC} ${C_FLAGS} -o ${BLD}smart_console.o -c ${SRC}util/smart_console.cpp
-
-${BLD}time_measure.o: ${SRC}util/time_measure.cpp
-	${CC} ${C_FLAGS} -o ${BLD}time_measure.o -c ${SRC}util/time_measure.cpp
-	
-${BLD}io.o: ${SRC}common/io.cpp
-	${CC} ${C_FLAGS} -o ${BLD}io.o -c ${SRC}common/io.cpp
-	
+######################################################################
+#------------------ STATIC SUBSECTION - DO NOT MODIFY ---------------#
 ######################################################################
 
-.PHONY: all
+#------------------ DEFAULT -------------------#
 
-make_project:
-	mkdir -p ${INC} ${LIB} ${BLD} ${SRC}
+# Release rule
+release: $(MAKE_EXTERNAL) info_prefix init_project ${LIB_NAME} info_suffix
+
+#------------------ LINKER --------------------#
+
+${LIB_NAME}: ${OBJECTS} clean_lib
+	@${LIB_CC} ${LIB_FLAGS} ${LIB}/${LIB_NAME}${LIB_EXT} ${OBJECTS}
+
+#----------------- COMPILERS ------------------#
+
+# cpp compiler
+$(OBJ)/%.o: %${CPP_EXT}
+	@echo ${INFO_SEPARATOR}
+	@echo 'COMPILING: ' $<
+	@echo
+	@$(CC) $(C_FLAGS) -c -o $@ $<
+
+# cuda compiler
+${OBJ}/%.o: %${CUDA_EXT}
+	@echo ${INFO_SEPARATOR}
+	@echo 'COMPILING: ' $<
+	@echo
+	@$(NVCC) $(NVCC_FLAGS) -c -o $@ $<
+
+#------------------ EXTERNALS -----------------#
+
+# Make external makefiles
+$(MAKE_EXTERNAL):
+	@$(MAKE) -C $@
+
+#---------------- UTILITY RULES ---------------#
+
+# Creates all the directories of the project
+init_project:
+	@mkdir -p ${OBJ} ${SRC} ${LIB} ${INC}
+
+clean: clean_lib
+	@$(RM) *.o *~ ${OBJ}/*.o ${OBJ}/*.d ${OBJ}/*~
 
 clean_lib:
-	${RM} ${LIB}*.a
-	
-clean: 
-	$(RM) ${BLD}*.o *.o ${LIB}*.a
+	@${RM} ${LIB}/${LIB_NAME}${LIB_EXT}
+
+.PHONY: $(SUBDIRS) clean
 
 ######################################################################
-	
+#------------------ DYNAMIC SUBSECTION - CAN MODIFY -----------------#
+######################################################################
+
+#----------------- PRINT RULES ----------------#
+
 info_prefix:
 	@echo
 	@echo
-	@echo "--------------------------------------------------------------------------------"
-	@echo 
-	@echo "\t\t\t\tCOMPILING:" ${LIB_NAME}
-	@echo 
+	@echo ${INFO_SEPARATOR}
+	@echo ${INFO_SEPARATOR}
+	@echo
+	@echo ${INFO_FILLER}"MAKING:" ${LIB_NAME}
+	@echo
 	@echo
 
 info_suffix:
 	@echo
-	@echo "--------------------------------------------------------------------------------"
+	@echo ${INFO_SEPARATOR}
 	@echo
+	@echo ${INFO_FILLER}"LINKING SUCCESSFULL"
+	@echo
+	@echo ${INFO_SEPARATOR}
+	@echo ${INFO_SEPARATOR}
+	@echo
+
+######################################################################
+#---------------------------------3----------------------------------#
+#---------------- DEPENDENCY GRAPH - DO NOT MODIFY ------------------#
+#--------------------------------------------------------------------#
+######################################################################
+
+#--------------- DEPENDENCY GRAPH -------------#
+
+# Automatic dependency graph generation
+# Must be inserted at the end of the makefile (TODO verify)
+-include $(OBJECTS:.o=.d)

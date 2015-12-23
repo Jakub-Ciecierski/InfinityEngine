@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   Socket.cpp
  * Author: ciecierskij
- * 
+ *
  * Created on July 24, 2015, 5:52 PM
  */
 
@@ -56,7 +56,7 @@ int Socket::initSocket()
  */
 void Socket::Open()
 {
-	int new_flags;
+	//int new_flags;
 
 	SmartPrint("Opening a Socket", 2);
 

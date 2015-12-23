@@ -80,7 +80,7 @@ INFO_FILLER = "\t\t\t\t"
 
 #--------------- LIBRARY NAME -------------#
 
-LIB_NAME = libstdifx
+LIB_NAME = libgifx
 LIB_EXT = .a
 
 #--------------- FILE EXTENSIONS --------------#

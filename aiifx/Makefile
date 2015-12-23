@@ -33,6 +33,7 @@
 # 2) LIB: Your, local Libraries to be linked with application
 # 3) BLD: Build where your compiled object files are stored
 # 4) SRC: Source files of this application
+# 5) BIN: Binary files, executables of the application
 #
 #---------------------------------------------------------------------
 #
@@ -78,10 +79,9 @@
 INFO_SEPARATOR = "--------------------------------------------------------------------------------"
 INFO_FILLER = "\t\t\t\t"
 
-#--------------- LIBRARY NAME -------------#
+#--------------- APPLICATION NAME -------------#
 
-LIB_NAME = libstdifx
-LIB_EXT = .a
+APP_NAME = galaxy
 
 #--------------- FILE EXTENSIONS --------------#
 
@@ -100,6 +100,8 @@ LIB = lib
 OBJ = build
 # Source files and only source files, subdirectories are supported.
 SRC = src
+# Executables of your Application
+BIN = bin
 
 #------------- EXTERNAL MAKEFILES -------------#
 
@@ -108,15 +110,24 @@ SRC = src
 # Can be used to compile your static libraries before linking
 MAKE_EXTERNAL =
 
+#---------------- LIBRARIES -------------------#
+
+# Paths and names of libraries to link with
+LIBS += -L /opt/cuda/lib64 \
+		-L /usr/local/cuda/lib64 \
+		-lGL -lglut -lGLEW -lcudart -lcuda
+
 #----------------- INCLUDES -------------------#
 
 # Paths to all Includes
 INCLUDES += -I /usr/local/cuda/include \
-    		-I /opt/cuda/include \
-				-I ${INC} -I ../stdifx/include
+    		-I /opt/cuda/include
 
 #------------------- FLAGS --------------------#
 
+# Use '-static' for static libraries
+# Use '-shared' for shared libraries
+L_FLAGS +=
 C_FLAGS += -g -Wall -std=c++11
 NVCC_FLAGS += -arch=sm_20
 
@@ -124,13 +135,13 @@ NVCC_FLAGS += -arch=sm_20
 #------------------ STATIC SUBSECTION - DO NOT MODIFY ---------------#
 ######################################################################
 
+LIBS += -L ${LIB}
 INCLUDES += -I ${INC}
 
-LIB_CC = ar
 CC = g++
 NVCC = nvcc
 
-LIB_FLAGS = -cvq
+L_FLAGS += ${LIBS}
 C_FLAGS += ${INCLUDES} -MMD
 NVCC_FLAGS +=
 
@@ -161,12 +172,12 @@ VPATH = ${MODULES}
 #------------------ DEFAULT -------------------#
 
 # Release rule
-release: $(MAKE_EXTERNAL) info_prefix init_project ${LIB_NAME} info_suffix
+release: $(MAKE_EXTERNAL) info_prefix init_project ${APP_NAME} info_suffix
 
 #------------------ LINKER --------------------#
 
-${LIB_NAME}: ${OBJECTS} clean_lib
-	@${LIB_CC} ${LIB_FLAGS} ${LIB}/${LIB_NAME}${LIB_EXT} ${OBJECTS}
+${APP_NAME}: ${OBJECTS}
+	@$(CC) -o ${BIN}/${APP_NAME} $^ $(L_FLAGS)
 
 #----------------- COMPILERS ------------------#
 
@@ -194,13 +205,10 @@ $(MAKE_EXTERNAL):
 
 # Creates all the directories of the project
 init_project:
-	@mkdir -p ${OBJ} ${SRC} ${LIB} ${INC}
+	@mkdir -p ${OBJ} ${BIN} ${SRC} ${LIB} ${INC}
 
-clean: clean_lib
-	@$(RM) *.o *~ ${OBJ}/*.o ${OBJ}/*.d ${OBJ}/*~
-
-clean_lib:
-	@${RM} ${LIB}/${LIB_NAME}${LIB_EXT}
+clean:
+	@$(RM) *.o *~ ${OBJ}/*.o ${OBJ}/*.d ${OBJ}/*~ ${BIN}/*
 
 .PHONY: $(SUBDIRS) clean
 
@@ -216,7 +224,7 @@ info_prefix:
 	@echo ${INFO_SEPARATOR}
 	@echo ${INFO_SEPARATOR}
 	@echo
-	@echo ${INFO_FILLER}"MAKING:" ${LIB_NAME}
+	@echo ${INFO_FILLER}"MAKING:" ${APP_NAME}
 	@echo
 	@echo
 
